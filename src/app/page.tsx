@@ -1,63 +1,205 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { Meal, TemplateStyle, DishData } from '@/types';
+import DishBrowser from '@/components/DishBrowser';
+import TemplatePicker from '@/components/TemplatePicker';
+import CarouselPreview from '@/components/CarouselPreview';
+import PostControls from '@/components/PostControls';
+import TikTokAuth from '@/components/TikTokAuth';
+
+function mealToDishData(meal: Meal, heroImageUrl: string): DishData {
+  const recipe = meal.recipes[0];
+  const profile = meal.profile;
+  const cookName = profile?.username || 'unknown';
+
+  // ingredients and instructions are already parsed as string[] by the API
+  const ingredients = recipe?.ingredients || [];
+  const instructions = recipe?.instructions || [];
+
+  return {
+    meal,
+    heroImageUrl,
+    recipeName: recipe?.title || meal.caption || 'Untitled Recipe',
+    cookName,
+    cookInitial: cookName.charAt(0).toUpperCase(),
+    cookTime: recipe?.cook_time ? `${recipe.cook_time} min` : '30 min',
+    ingredients,
+    instructions,
+    stepCount: instructions.length,
+    ingredientCount: ingredients.length,
+  };
+}
 
 export default function Home() {
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [heroImageUrl, setHeroImageUrl] = useState<string>('');
+  const [editedTitle, setEditedTitle] = useState<string>('');
+  const [template, setTemplate] = useState<TemplateStyle>('A');
+  const [slides, setSlides] = useState<string[]>([]);
+  const [generating, setGenerating] = useState(false);
+  const [tiktokConnected, setTiktokConnected] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+
+  function handleSelectMeal(meal: Meal) {
+    setSelectedMeal(meal);
+    const recipe = meal.recipes[0];
+    setEditedTitle(recipe?.title || meal.caption || 'Untitled Recipe');
+  }
+
+  async function generateCarousel() {
+    if (!selectedMeal) return;
+
+    setGenerating(true);
+    setSlides([]);
+
+    try {
+      const dishData = { ...mealToDishData(selectedMeal, heroImageUrl), recipeName: editedTitle };
+      const res = await fetch('/api/carousel/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dishData, template }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Generation failed');
+      }
+
+      const data = await res.json();
+      setSlides(data.slides);
+    } catch (e) {
+      alert('Generation failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  async function publishToTikTok(caption: string) {
+    if (slides.length === 0) return;
+
+    setPublishing(true);
+    try {
+      const res = await fetch('/api/tiktok/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slides, caption }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Publishing failed');
+      }
+
+      const data = await res.json();
+      alert(`Published! Post ID: ${data.publish_id}`);
+    } catch (e) {
+      alert('Publishing failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">BC</span>
+            </div>
+            <h1 className="text-lg font-bold text-gray-900">BiteClub TikTok Poster</h1>
+          </div>
+          <div className="w-72">
+            <TikTokAuth onStatusChange={setTiktokConnected} />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </header>
+
+      <main className="max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left panel: Dish Browser */}
+          <div className="col-span-5 bg-white rounded-2xl border border-gray-200 p-4 max-h-[calc(100vh-140px)] flex flex-col">
+            <h2 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                1
+              </span>
+              Choose a Dish
+            </h2>
+            <DishBrowser
+              selectedMeal={selectedMeal}
+              onSelectMeal={handleSelectMeal}
+              onSelectHeroImage={setHeroImageUrl}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          {/* Right panel: Template + Preview + Controls */}
+          <div className="col-span-7 space-y-6">
+            {/* Template Picker */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-4">
+              <h2 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                  2
+                </span>
+                Pick a Template
+              </h2>
+              <TemplatePicker selected={template} onSelect={setTemplate} />
+
+              {/* Editable title */}
+              {selectedMeal && (
+                <div className="mt-4">
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">Recipe Title</label>
+                  <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
+                  />
+                </div>
+              )}
+
+              {/* Generate button */}
+              <button
+                onClick={generateCarousel}
+                disabled={!selectedMeal || generating}
+                className="mt-4 w-full px-4 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {generating ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                    Generating 4 slides...
+                  </span>
+                ) : (
+                  `Generate Carousel${selectedMeal ? ` for "${selectedMeal.recipes[0]?.title || selectedMeal.caption || 'dish'}"` : ''}`
+                )}
+              </button>
+            </div>
+
+            {/* Carousel Preview */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-4">
+              <h2 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                  3
+                </span>
+                Preview & Post
+              </h2>
+              <CarouselPreview slides={slides} loading={generating} />
+            </div>
+
+            {/* Post Controls */}
+            {slides.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-4">
+                <PostControls
+                  slides={slides}
+                  recipeName={selectedMeal?.recipes[0]?.title || 'recipe'}
+                  onPublish={publishToTikTok}
+                  tiktokConnected={tiktokConnected}
+                  publishing={publishing}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

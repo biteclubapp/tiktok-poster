@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# TikTok tokens
+.tiktok-tokens.json
+
+# Generated carousel images
+/tmp/carousel/
