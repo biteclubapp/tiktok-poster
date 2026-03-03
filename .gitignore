@@ -45,3 +45,8 @@ next-env.d.ts
 
 # Generated carousel images
 /tmp/carousel/
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal

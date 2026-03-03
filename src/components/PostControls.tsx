@@ -6,6 +6,7 @@ interface PostControlsProps {
   slides: string[];
   recipeName: string;
   onPublish: (caption: string) => void;
+  onSchedule: (caption: string) => void;
   tiktokConnected: boolean;
   publishing: boolean;
 }
@@ -14,6 +15,7 @@ export default function PostControls({
   slides,
   recipeName,
   onPublish,
+  onSchedule,
   tiktokConnected,
   publishing,
 }: PostControlsProps) {
@@ -59,6 +61,14 @@ export default function PostControls({
           className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Download JPEGs
+        </button>
+
+        <button
+          onClick={() => onSchedule(caption)}
+          disabled={slides.length === 0}
+          className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl text-sm font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Schedule
         </button>
 
         <button

@@ -45,9 +45,17 @@ async function loadEmoji(segment: string): Promise<string> {
   return '';
 }
 
-async function renderJsxToJpeg(element: React.ReactElement): Promise<Buffer> {
-  const fonts = await loadFonts();
+// Pre-warm fonts on module load so first render is fast
+let fontsPromise: ReturnType<typeof loadFonts> | null = null;
+function getFonts() {
+  if (!fontsPromise) fontsPromise = loadFonts();
+  return fontsPromise;
+}
 
+async function renderJsxToJpeg(
+  element: React.ReactElement,
+  fonts: Awaited<ReturnType<typeof loadFonts>>
+): Promise<Buffer> {
   // Satori: JSX -> SVG with emoji support via Twemoji
   const svg = await satori(element, {
     width: WIDTH,
@@ -61,15 +69,19 @@ async function renderJsxToJpeg(element: React.ReactElement): Promise<Buffer> {
     },
   });
 
-  // resvg: SVG -> PNG buffer
+  // resvg: SVG -> PNG buffer (render at reduced size for speed, sharp upscales)
+  const RENDER_WIDTH = Math.round(WIDTH * 0.6);
   const resvg = new Resvg(svg, {
-    fitTo: { mode: 'width', value: WIDTH },
+    fitTo: { mode: 'width', value: RENDER_WIDTH },
   });
   const pngData = resvg.render();
   const pngBuffer = pngData.asPng();
 
-  // sharp: PNG -> JPEG at quality 90
-  const jpegBuffer = await sharp(pngBuffer).jpeg({ quality: 90 }).toBuffer();
+  // sharp: upscale to full 1080x1920 + convert to JPEG
+  const jpegBuffer = await sharp(pngBuffer)
+    .resize(WIDTH, HEIGHT, { kernel: 'lanczos3' })
+    .jpeg({ quality: 88 })
+    .toBuffer();
 
   return jpegBuffer;
 }
@@ -80,40 +92,40 @@ export async function generateCarousel(
 ): Promise<Buffer[]> {
   const { hero, ingredients, steps } = templateMap[template];
 
-  // Fetch and convert hero image to base64
-  let heroImageBase64 = '';
-  if (dish.heroImageUrl) {
-    heroImageBase64 = await imageToBase64(dish.heroImageUrl);
-  }
+  // Load fonts + fetch hero image in parallel
+  const [fonts, heroImageBase64] = await Promise.all([
+    getFonts(),
+    dish.heroImageUrl ? imageToBase64(dish.heroImageUrl) : Promise.resolve(''),
+  ]);
 
   const slideProps = { dish, heroImageBase64 };
 
   // Build slides dynamically — skip ingredients/steps if dish has none
-  const slides: React.ReactElement[] = [hero(slideProps)];
-  const slideNames: string[] = ['hero'];
+  const slides: { element: React.ReactElement; name: string }[] = [
+    { element: hero(slideProps), name: 'hero' },
+  ];
 
   if (dish.ingredients.length > 0) {
-    slides.push(ingredients(slideProps));
-    slideNames.push('ingredients');
+    slides.push({ element: ingredients(slideProps), name: 'ingredients' });
   }
 
   if (dish.instructions.length > 0) {
-    slides.push(steps(slideProps));
-    slideNames.push('steps');
+    slides.push({ element: steps(slideProps), name: 'steps' });
   }
 
-  slides.push(renderCTASlide(template));
-  slideNames.push('cta');
-  const jpegBuffers: Buffer[] = [];
-  for (let i = 0; i < slides.length; i++) {
-    try {
-      const buf = await renderJsxToJpeg(slides[i]);
-      jpegBuffers.push(buf);
-    } catch (error) {
-      console.error(`Failed to render slide ${i} (${slideNames[i]}) for template ${template}:`, error);
-      throw error;
-    }
-  }
+  slides.push({ element: renderCTASlide(template), name: 'cta' });
+
+  // Render all slides in parallel
+  const jpegBuffers = await Promise.all(
+    slides.map(async ({ element, name }, i) => {
+      try {
+        return await renderJsxToJpeg(element, fonts);
+      } catch (error) {
+        console.error(`Failed to render slide ${i} (${name}) for template ${template}:`, error);
+        throw error;
+      }
+    })
+  );
 
   return jpegBuffers;
 }

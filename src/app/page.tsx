@@ -7,6 +7,7 @@ import TemplatePicker from '@/components/TemplatePicker';
 import CarouselPreview from '@/components/CarouselPreview';
 import PostControls from '@/components/PostControls';
 import TikTokAuth from '@/components/TikTokAuth';
+import ScheduleModal from '@/components/ScheduleModal';
 
 function mealToDishData(meal: Meal, heroImageUrl: string): DishData {
   const recipe = meal.recipes[0];
@@ -40,6 +41,9 @@ export default function Home() {
   const [generating, setGenerating] = useState(false);
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [schedulingCaption, setSchedulingCaption] = useState('');
+  const [scheduling, setScheduling] = useState(false);
 
   function handleSelectMeal(meal: Meal) {
     setSelectedMeal(meal);
@@ -100,22 +104,49 @@ export default function Home() {
     }
   }
 
+  function handleOpenSchedule(caption: string) {
+    setSchedulingCaption(caption);
+    setScheduleModalOpen(true);
+  }
+
+  async function handleSchedule(scheduledAt: number) {
+    if (!selectedMeal) return;
+    setScheduling(true);
+    try {
+      const dishData = { ...mealToDishData(selectedMeal, heroImageUrl), recipeName: editedTitle };
+      const res = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dishData,
+          template,
+          caption: schedulingCaption,
+          scheduledAt,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Scheduling failed');
+      }
+      setScheduleModalOpen(false);
+      alert('Post scheduled! View it on the Schedule page.');
+    } catch (e) {
+      alert('Scheduling failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
+    } finally {
+      setScheduling(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">BC</span>
-            </div>
-            <h1 className="text-lg font-bold text-gray-900">BiteClub TikTok Poster</h1>
-          </div>
+      {/* TikTok auth bar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-2">
+        <div className="max-w-7xl mx-auto flex justify-end">
           <div className="w-72">
             <TikTokAuth onStatusChange={setTiktokConnected} />
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-12 gap-6">
@@ -194,6 +225,7 @@ export default function Home() {
                   slides={slides}
                   recipeName={selectedMeal?.recipes[0]?.title || 'recipe'}
                   onPublish={publishToTikTok}
+                  onSchedule={handleOpenSchedule}
                   tiktokConnected={tiktokConnected}
                   publishing={publishing}
                 />
@@ -202,6 +234,13 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <ScheduleModal
+        open={scheduleModalOpen}
+        onClose={() => setScheduleModalOpen(false)}
+        onSchedule={handleSchedule}
+        scheduling={scheduling}
+      />
     </div>
   );
 }

@@ -48,6 +48,10 @@ export default function CarouselPreview({ slides, loading }: CarouselPreviewProp
               src={url}
               alt={`Slide ${i + 1}: ${slideLabels[i]}`}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error(`Failed to load slide ${i}:`, url);
+                (e.target as HTMLImageElement).style.background = '#fee';
+              }}
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
               <span className="text-white text-xs font-medium">{slideLabels[i]}</span>
