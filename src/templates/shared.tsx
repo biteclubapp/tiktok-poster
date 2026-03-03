@@ -108,9 +108,12 @@ export function getIngredientEmoji(ingredient: string): string {
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 
+export type Platform = 'tiktok' | 'reddit';
+
 export interface SlideProps {
   dish: DishData;
   heroImageBase64?: string;
+  platform?: Platform;
 }
 
 // CTA Slide — same for all templates

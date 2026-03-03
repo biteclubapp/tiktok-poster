@@ -7,6 +7,7 @@ import TemplatePicker from '@/components/TemplatePicker';
 import CarouselPreview from '@/components/CarouselPreview';
 import PostControls from '@/components/PostControls';
 import TikTokAuth from '@/components/TikTokAuth';
+import RedditAuth from '@/components/RedditAuth';
 import ScheduleModal from '@/components/ScheduleModal';
 
 function mealToDishData(meal: Meal, heroImageUrl: string): DishData {
@@ -40,7 +41,9 @@ export default function Home() {
   const [slides, setSlides] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [tiktokConnected, setTiktokConnected] = useState(false);
+  const [redditConnected, setRedditConnected] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [publishingReddit, setPublishingReddit] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [schedulingCaption, setSchedulingCaption] = useState('');
   const [scheduling, setScheduling] = useState(false);
@@ -104,6 +107,51 @@ export default function Home() {
     }
   }
 
+  async function publishToReddit(title: string, subreddit: string) {
+    if (!selectedMeal) return;
+
+    setPublishingReddit(true);
+    try {
+      // Generate Reddit-specific carousel (no CTA, no branding)
+      const dishData = { ...mealToDishData(selectedMeal, heroImageUrl), recipeName: editedTitle };
+      const genRes = await fetch('/api/carousel/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dishData, template, platform: 'reddit' }),
+      });
+
+      if (!genRes.ok) {
+        const err = await genRes.json();
+        throw new Error(err.error || 'Reddit carousel generation failed');
+      }
+
+      const genData = await genRes.json();
+
+      // Publish to Reddit
+      const res = await fetch('/api/reddit/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slides: genData.slides,
+          title,
+          subreddit,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Reddit publishing failed');
+      }
+
+      const data = await res.json();
+      alert(`Posted to Reddit! ${data.url || 'Check your profile.'}`);
+    } catch (e) {
+      alert('Reddit publishing failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
+    } finally {
+      setPublishingReddit(false);
+    }
+  }
+
   function handleOpenSchedule(caption: string) {
     setSchedulingCaption(caption);
     setScheduleModalOpen(true);
@@ -139,11 +187,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* TikTok auth bar */}
+      {/* Auth bar */}
       <div className="bg-white border-b border-gray-200 px-6 py-2">
-        <div className="max-w-7xl mx-auto flex justify-end">
+        <div className="max-w-7xl mx-auto flex justify-end gap-3">
           <div className="w-72">
             <TikTokAuth onStatusChange={setTiktokConnected} />
+          </div>
+          <div className="w-72">
+            <RedditAuth onStatusChange={setRedditConnected} />
           </div>
         </div>
       </div>
@@ -199,7 +250,7 @@ export default function Home() {
                 {generating ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                    Generating 4 slides...
+                    Generating slides...
                   </span>
                 ) : (
                   `Generate Carousel${selectedMeal ? ` for "${selectedMeal.recipes[0]?.title || selectedMeal.caption || 'dish'}"` : ''}`
@@ -226,8 +277,11 @@ export default function Home() {
                   recipeName={selectedMeal?.recipes[0]?.title || 'recipe'}
                   onPublish={publishToTikTok}
                   onSchedule={handleOpenSchedule}
+                  onPublishReddit={publishToReddit}
                   tiktokConnected={tiktokConnected}
+                  redditConnected={redditConnected}
                   publishing={publishing}
+                  publishingReddit={publishingReddit}
                 />
               </div>
             )}

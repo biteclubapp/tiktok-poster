@@ -92,35 +92,6 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
             </div>
           </div>
 
-          {/* Cook avatar */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            <div
-              style={{
-                width: 96,
-                height: 96,
-                borderRadius: 48,
-                background: 'linear-gradient(135deg, #E63946, #FF6B6B)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 39,
-                color: '#fff',
-                fontWeight: 700,
-              }}
-            >
-              {dish.cookInitial}
-            </div>
-            <div style={{ fontSize: 27, color: '#a09080', fontWeight: 600 }}>
-              {`@${dish.cookName}`}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -139,7 +110,7 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
   );
 }
 
-export function styleCIngredients({ dish }: SlideProps): React.ReactElement {
+export function styleCIngredients({ dish, platform }: SlideProps): React.ReactElement {
   const maxIngredients = Math.min(dish.ingredients.length, 16);
   const ingredients = dish.ingredients.slice(0, maxIngredients);
   const s = getIngredientSizing(ingredients.length);
@@ -220,27 +191,29 @@ export function styleCIngredients({ dish }: SlideProps): React.ReactElement {
       </div>
 
       {/* BITECLUB branding */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 48,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
+      {platform !== 'reddit' && (
         <div
           style={{
-            color: '#d4c4b0',
-            fontSize: 30,
-            fontWeight: 700,
-            letterSpacing: '0.12em',
+            position: 'absolute',
+            bottom: 48,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            justifyContent: 'center',
           }}
         >
-          BITECLUB
+          <div
+            style={{
+              color: '#d4c4b0',
+              fontSize: 30,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+            }}
+          >
+            BITECLUB
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom accent */}
       <div
@@ -257,7 +230,7 @@ export function styleCIngredients({ dish }: SlideProps): React.ReactElement {
   );
 }
 
-export function styleCSteps({ dish }: SlideProps): React.ReactElement {
+export function styleCSteps({ dish, platform }: SlideProps): React.ReactElement {
   const maxSteps = Math.min(dish.instructions.length, 10);
   const steps = dish.instructions.slice(0, maxSteps);
   const s = getStepSizing(steps.length);
@@ -352,27 +325,29 @@ export function styleCSteps({ dish }: SlideProps): React.ReactElement {
       </div>
 
       {/* BITECLUB branding */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 48,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
+      {platform !== 'reddit' && (
         <div
           style={{
-            color: '#d4c4b0',
-            fontSize: 30,
-            fontWeight: 700,
-            letterSpacing: '0.12em',
+            position: 'absolute',
+            bottom: 48,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            justifyContent: 'center',
           }}
         >
-          BITECLUB
+          <div
+            style={{
+              color: '#d4c4b0',
+              fontSize: 30,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+            }}
+          >
+            BITECLUB
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom accent */}
       <div

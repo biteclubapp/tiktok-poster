@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCarousel } from '@/templates/render';
 import { CarouselRequest, TemplateStyle } from '@/types';
+import { Platform } from '@/templates/shared';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
@@ -9,8 +10,8 @@ const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CarouselRequest = await request.json();
-    const { dishData, template } = body;
+    const body = await request.json();
+    const { dishData, template, platform } = body as CarouselRequest & { platform?: Platform };
 
     if (!dishData || !template) {
       return NextResponse.json(
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate carousel slides
-    const jpegBuffers = await generateCarousel(dishData, template as TemplateStyle);
+    const jpegBuffers = await generateCarousel(dishData, template as TemplateStyle, platform);
 
     // Save to tmp directory
     await mkdir(TMP_DIR, { recursive: true });

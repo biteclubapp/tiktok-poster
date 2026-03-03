@@ -66,3 +66,10 @@ export interface TikTokTokens {
   expires_at: number;
   open_id: string;
 }
+
+export interface RedditTokens {
+  access_token: string;
+  refresh_token: string;
+  expires_at: number;
+  username: string;
+}

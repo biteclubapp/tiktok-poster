@@ -3,7 +3,7 @@ import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
 import { loadFonts } from '@/lib/fonts';
 import { DishData, TemplateStyle } from '@/types';
-import { WIDTH, HEIGHT, renderCTASlide, imageToBase64 } from './shared';
+import { WIDTH, HEIGHT, renderCTASlide, imageToBase64, Platform } from './shared';
 import { styleAHero, styleAIngredients, styleASteps } from './styleA';
 import { styleBHero, styleBIngredients, styleBSteps } from './styleB';
 import { styleCHero, styleCIngredients, styleCSteps } from './styleC';
@@ -88,7 +88,8 @@ async function renderJsxToJpeg(
 
 export async function generateCarousel(
   dish: DishData,
-  template: TemplateStyle
+  template: TemplateStyle,
+  platform?: Platform
 ): Promise<Buffer[]> {
   const { hero, ingredients, steps } = templateMap[template];
 
@@ -98,7 +99,7 @@ export async function generateCarousel(
     dish.heroImageUrl ? imageToBase64(dish.heroImageUrl) : Promise.resolve(''),
   ]);
 
-  const slideProps = { dish, heroImageBase64 };
+  const slideProps = { dish, heroImageBase64, platform };
 
   // Build slides dynamically — skip ingredients/steps if dish has none
   const slides: { element: React.ReactElement; name: string }[] = [
@@ -113,7 +114,10 @@ export async function generateCarousel(
     slides.push({ element: steps(slideProps), name: 'steps' });
   }
 
-  slides.push({ element: renderCTASlide(template), name: 'cta' });
+  // Skip CTA slide for Reddit
+  if (platform !== 'reddit') {
+    slides.push({ element: renderCTASlide(template), name: 'cta' });
+  }
 
   // Render all slides in parallel
   const jpegBuffers = await Promise.all(

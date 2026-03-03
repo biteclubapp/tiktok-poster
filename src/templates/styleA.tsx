@@ -58,41 +58,6 @@ export function styleAHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
         }}
       />
 
-      {/* Cook info - top right */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 48,
-          right: 48,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 24,
-          background: 'rgba(0,0,0,0.5)',
-          borderRadius: 60,
-          padding: '18px 36px 18px 18px',
-        }}
-      >
-        <div
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: 36,
-            background: 'linear-gradient(135deg, #E63946, #FF6B6B)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 30,
-            color: '#fff',
-            fontWeight: 700,
-          }}
-        >
-          {dish.cookInitial}
-        </div>
-        <div style={{ color: '#fff', fontSize: 33, fontWeight: 600 }}>
-          {`@${dish.cookName}`}
-        </div>
-      </div>
-
       {/* Title overlay - bottom */}
       <div
         style={{
@@ -143,7 +108,7 @@ export function styleAHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
   );
 }
 
-export function styleAIngredients({ dish }: SlideProps): React.ReactElement {
+export function styleAIngredients({ dish, platform }: SlideProps): React.ReactElement {
   const maxIngredients = Math.min(dish.ingredients.length, 16);
   const ingredients = dish.ingredients.slice(0, maxIngredients);
   const s = getIngredientSizing(ingredients.length);
@@ -222,43 +187,45 @@ export function styleAIngredients({ dish }: SlideProps): React.ReactElement {
       </div>
 
       {/* BiteClub branding */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 60,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 18,
-        }}
-      >
+      {platform !== 'reddit' && (
         <div
           style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            background: '#E63946',
+            position: 'absolute',
+            bottom: 60,
+            left: 0,
+            right: 0,
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
-            fontSize: 16,
-            fontWeight: 700,
+            alignItems: 'center',
+            gap: 18,
           }}
         >
-          BC
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              background: '#E63946',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 700,
+            }}
+          >
+            BC
+          </div>
+          <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
+            BiteClub
+          </div>
         </div>
-        <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
-          BiteClub
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-export function styleASteps({ dish }: SlideProps): React.ReactElement {
+export function styleASteps({ dish, platform }: SlideProps): React.ReactElement {
   const maxSteps = Math.min(dish.instructions.length, 10);
   const steps = dish.instructions.slice(0, maxSteps);
   const s = getStepSizing(steps.length);
@@ -350,38 +317,40 @@ export function styleASteps({ dish }: SlideProps): React.ReactElement {
       </div>
 
       {/* BiteClub branding */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 60,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 18,
-        }}
-      >
+      {platform !== 'reddit' && (
         <div
           style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            background: '#E63946',
+            position: 'absolute',
+            bottom: 60,
+            left: 0,
+            right: 0,
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
-            fontSize: 16,
-            fontWeight: 700,
+            alignItems: 'center',
+            gap: 18,
           }}
         >
-          BC
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              background: '#E63946',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 700,
+            }}
+          >
+            BC
+          </div>
+          <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
+            BiteClub
+          </div>
         </div>
-        <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
-          BiteClub
-        </div>
-      </div>
+      )}
     </div>
   );
 }

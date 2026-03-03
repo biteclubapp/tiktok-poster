@@ -143,7 +143,7 @@ export function styleBHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
   );
 }
 
-export function styleBIngredients({ dish }: SlideProps): React.ReactElement {
+export function styleBIngredients({ dish, platform }: SlideProps): React.ReactElement {
   const maxIngredients = Math.min(dish.ingredients.length, 16);
   const ingredients = dish.ingredients.slice(0, maxIngredients);
   const s = getIngredientSizing(ingredients.length);
@@ -221,24 +221,26 @@ export function styleBIngredients({ dish }: SlideProps): React.ReactElement {
       </div>
 
       {/* BITECLUB branding */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 60,
-          right: 72,
-          color: '#333',
-          fontSize: 30,
-          fontWeight: 600,
-          letterSpacing: '0.1em',
-        }}
-      >
-        BITECLUB
-      </div>
+      {platform !== 'reddit' && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 60,
+            right: 72,
+            color: '#333',
+            fontSize: 30,
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+          }}
+        >
+          BITECLUB
+        </div>
+      )}
     </div>
   );
 }
 
-export function styleBSteps({ dish }: SlideProps): React.ReactElement {
+export function styleBSteps({ dish, platform }: SlideProps): React.ReactElement {
   const maxSteps = Math.min(dish.instructions.length, 10);
   const steps = dish.instructions.slice(0, maxSteps);
   const s = getStepSizing(steps.length);
@@ -327,19 +329,21 @@ export function styleBSteps({ dish }: SlideProps): React.ReactElement {
       </div>
 
       {/* BITECLUB branding */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 60,
-          right: 72,
-          color: '#333',
-          fontSize: 30,
-          fontWeight: 600,
-          letterSpacing: '0.1em',
-        }}
-      >
-        BITECLUB
-      </div>
+      {platform !== 'reddit' && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 60,
+            right: 72,
+            color: '#333',
+            fontSize: 30,
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+          }}
+        >
+          BITECLUB
+        </div>
+      )}
     </div>
   );
 }

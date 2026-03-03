@@ -44,6 +44,10 @@ next-env.d.ts
 .tiktok-tokens.json
 .tiktok-pkce.json
 
+# Reddit tokens & state
+.reddit-tokens.json
+.reddit-state.json
+
 # Generated carousel images
 /tmp/carousel/
 
