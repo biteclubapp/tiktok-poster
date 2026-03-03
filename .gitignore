@@ -40,8 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# TikTok tokens
+# TikTok tokens & PKCE
 .tiktok-tokens.json
+.tiktok-pkce.json
 
 # Generated carousel images
 /tmp/carousel/

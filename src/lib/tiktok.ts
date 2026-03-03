@@ -1,36 +1,64 @@
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
+import { randomBytes, createHash } from 'crypto';
 import { TikTokTokens } from '@/types';
 
 const TOKENS_FILE = join(process.cwd(), '.tiktok-tokens.json');
+const PKCE_FILE = join(process.cwd(), '.tiktok-pkce.json');
 
-const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY || '';
-const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET || '';
-const REDIRECT_URI = process.env.TIKTOK_REDIRECT_URI || 'http://localhost:3000/auth/callback';
+function generateCodeVerifier(): string {
+  return randomBytes(32).toString('base64url');
+}
 
-export function getAuthUrl(): string {
+function generateCodeChallenge(verifier: string): string {
+  return createHash('sha256').update(verifier).digest('base64url');
+}
+
+function getClientKey() { return process.env.TIKTOK_CLIENT_KEY || ''; }
+function getClientSecret() { return process.env.TIKTOK_CLIENT_SECRET || ''; }
+function getRedirectUri() { return process.env.TIKTOK_REDIRECT_URI || 'http://localhost:3000/auth/callback'; }
+
+export async function getAuthUrl(): Promise<string> {
   const csrfState = Math.random().toString(36).substring(2);
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = generateCodeChallenge(codeVerifier);
+
+  await writeFile(PKCE_FILE, JSON.stringify({ code_verifier: codeVerifier }));
+
   const params = new URLSearchParams({
-    client_key: CLIENT_KEY,
+    client_key: getClientKey(),
     scope: 'user.info.basic,video.publish',
     response_type: 'code',
-    redirect_uri: REDIRECT_URI,
+    redirect_uri: getRedirectUri(),
     state: csrfState,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
   });
   return `https://www.tiktok.com/v2/auth/authorize/?${params}`;
 }
 
 export async function exchangeCode(code: string): Promise<TikTokTokens> {
+  let codeVerifier: string | undefined;
+  try {
+    const pkceData = JSON.parse(await readFile(PKCE_FILE, 'utf-8'));
+    codeVerifier = pkceData.code_verifier;
+  } catch {
+    throw new Error('PKCE verifier not found — restart the auth flow');
+  }
+
+  const body: Record<string, string> = {
+    client_key: getClientKey(),
+    client_secret: getClientSecret(),
+    code,
+    grant_type: 'authorization_code',
+    redirect_uri: getRedirectUri(),
+    code_verifier: codeVerifier!,
+  };
+
   const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_key: CLIENT_KEY,
-      client_secret: CLIENT_SECRET,
-      code,
-      grant_type: 'authorization_code',
-      redirect_uri: REDIRECT_URI,
-    }),
+    body: new URLSearchParams(body),
   });
 
   const data = await response.json();
@@ -46,6 +74,10 @@ export async function exchangeCode(code: string): Promise<TikTokTokens> {
   };
 
   await saveTokens(tokens);
+
+  // Clean up PKCE file after successful exchange
+  try { await unlink(PKCE_FILE); } catch {}
+
   return tokens;
 }
 
@@ -57,8 +89,8 @@ export async function refreshTokens(): Promise<TikTokTokens> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_key: CLIENT_KEY,
-      client_secret: CLIENT_SECRET,
+      client_key: getClientKey(),
+      client_secret: getClientSecret(),
       grant_type: 'refresh_token',
       refresh_token: current.refresh_token,
     }),
@@ -111,7 +143,6 @@ async function saveTokens(tokens: TikTokTokens): Promise<void> {
 
 export async function deleteTokens(): Promise<void> {
   try {
-    const { unlink } = await import('fs/promises');
     await unlink(TOKENS_FILE);
   } catch {
     // File doesn't exist, that's fine
