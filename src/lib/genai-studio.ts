@@ -8,9 +8,12 @@ import { randomUUID } from 'crypto';
 import { constants as fsConstants } from 'fs';
 import { access, mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { fetchTrendingHashtags } from './trending';
+import {
+  DEFAULT_STUDIO_IMAGE_CREATOR_ID,
+  getStudioImageCreatorById,
+  type StudioImageCreatorOption,
+} from './studio-models';
 
-const OPENROUTER_IMAGE_MODEL = process.env.OPENROUTER_IMAGE_MODEL || 'google/gemini-3.1-flash-image-preview';
 const OPENROUTER_CHAT_COMPLETIONS_URL =
   process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
 const VIDEO_MODEL = 'veo-3.1-fast-generate-preview';
@@ -151,7 +154,7 @@ function normalizeHashtag(tag: string): string {
 function keywordHashtags(text: string): string[] {
   const stopWords = new Set([
     'the', 'and', 'for', 'with', 'this', 'that', 'from', 'into', 'your', 'just', 'make', 'made',
-    'food', 'dish', 'video', 'shot', 'scene', 'show', 'over', 'under', 'onto', 'about', 'have',
+    'video', 'shot', 'scene', 'show', 'over', 'under', 'onto', 'about', 'have',
     'will', 'when', 'then', 'than', 'slow', 'fast', 'very', 'more', 'most', 'some', 'there',
     'their', 'they', 'them', 'our', 'out', 'are', 'was', 'were', 'you', 'yours', 'his', 'her',
   ]);
@@ -166,13 +169,13 @@ function keywordHashtags(text: string): string[] {
 
 function fallbackMetadata(imagePrompt: string, motionPrompt: string, trendingTags: string[]): StudioMetadataResult {
   const baseTags = [
-    '#foodtiktok',
-    '#recipe',
-    '#homecooking',
-    '#foodie',
-    '#easyrecipe',
-    '#cookingtiktok',
-    '#dinnerideas',
+    '#tiktok',
+    '#fyp',
+    '#viral',
+    '#contentcreator',
+    '#video',
+    '#creator',
+    '#trend',
   ];
 
   const promptTags = keywordHashtags(`${imagePrompt} ${motionPrompt}`);
@@ -187,7 +190,7 @@ function fallbackMetadata(imagePrompt: string, motionPrompt: string, trendingTag
   }
 
   const hook = imagePrompt.split(/[.!?]/)[0]?.trim() || 'You need to try this next';
-  const caption = `${hook}\n\n${motionPrompt}\n\nSave this for your next meal.`.slice(0, 350);
+  const caption = `${hook}\n\n${motionPrompt}\n\nSave this for later.`.slice(0, 350);
 
   return { caption, hashtags };
 }
@@ -357,7 +360,7 @@ async function parseGeneratedImage(imageUrl: string): Promise<{ imageBytes: Buff
   }
 
   if (!/^https?:\/\//i.test(imageUrl)) {
-    throw new Error('OpenRouter returned an unsupported image format.');
+    throw new Error('The selected image model returned an unsupported image format.');
   }
 
   const response = await fetch(imageUrl, { method: 'GET' });
@@ -427,13 +430,13 @@ export async function ensureStudioDirs(): Promise<void> {
   ]);
 }
 
-async function generateStudioImageInternal(
-  promptInput: string,
+async function generateStudioImageWithOpenRouter(
+  model: string,
+  prompt: string,
   referenceImage?: { imageBytes: Buffer; mimeType: string }
 ): Promise<GeneratedImageResult> {
-  const prompt = normalizePrompt(promptInput);
   const requestBody: Record<string, unknown> = {
-    model: OPENROUTER_IMAGE_MODEL,
+    model,
     modalities: ['image', 'text'],
     messages: [
       {
@@ -471,16 +474,15 @@ async function generateStudioImageInternal(
 
   const responseJson = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
-    throw new Error(`OpenRouter image generation failed: ${openRouterErrorMessage(responseJson, response.statusText)}`);
+    throw new Error(`Image generation failed: ${openRouterErrorMessage(responseJson, response.statusText)}`);
   }
 
   const imageUrl = extractImageUrlFromOpenRouterResponse(responseJson);
   if (!imageUrl) {
-    throw new Error('OpenRouter did not return an image. Try a more concrete prompt.');
+    throw new Error('The selected image model did not return an image. Try a more concrete prompt.');
   }
 
   const generatedImage = await parseGeneratedImage(imageUrl);
-
   return {
     imageBytes: generatedImage.imageBytes,
     mimeType: generatedImage.mimeType,
@@ -488,15 +490,38 @@ async function generateStudioImageInternal(
   };
 }
 
+function resolveImageCreatorOrThrow(imageCreatorId?: string): StudioImageCreatorOption {
+  const imageCreator =
+    getStudioImageCreatorById(imageCreatorId) || getStudioImageCreatorById(DEFAULT_STUDIO_IMAGE_CREATOR_ID);
+
+  if (!imageCreator || !imageCreator.enabled) {
+    throw new Error('Invalid image creator selected.');
+  }
+
+  return imageCreator;
+}
+
+async function generateStudioImageInternal(
+  promptInput: string,
+  imageCreator: StudioImageCreatorOption,
+  referenceImage?: { imageBytes: Buffer; mimeType: string }
+): Promise<GeneratedImageResult> {
+  const prompt = normalizePrompt(promptInput);
+  return generateStudioImageWithOpenRouter(imageCreator.model, prompt, referenceImage);
+}
+
 export async function generateStudioImage(promptInput: string): Promise<GeneratedImageResult> {
-  return generateStudioImageInternal(promptInput);
+  const imageCreator = resolveImageCreatorOrThrow();
+  return generateStudioImageInternal(promptInput, imageCreator);
 }
 
 export async function generateStudioImageFromOptionalReference(
   promptInput: string,
-  referenceImage?: { imageBytes: Buffer; mimeType: string }
+  referenceImage?: { imageBytes: Buffer; mimeType: string },
+  imageCreatorId?: string
 ): Promise<GeneratedImageResult> {
-  return generateStudioImageInternal(promptInput, referenceImage);
+  const imageCreator = resolveImageCreatorOrThrow(imageCreatorId);
+  return generateStudioImageInternal(promptInput, imageCreator, referenceImage);
 }
 
 export async function saveGeneratedImage(image: GeneratedImageResult): Promise<{ imageId: string; imagePath: string }> {
@@ -655,9 +680,7 @@ export async function generateTiktokMetadata(imagePromptInput: string, motionPro
   const imagePrompt = normalizePrompt(imagePromptInput);
   const motionPrompt = normalizePrompt(motionPromptInput);
 
-  const trendingTags = await fetchTrendingHashtags()
-    .then((tags) => tags.map((t) => normalizeHashtag(t.tag)).filter(Boolean).slice(0, 12))
-    .catch(() => [] as string[]);
+  const trendingTags: string[] = [];
 
   const fallback = fallbackMetadata(imagePrompt, motionPrompt, trendingTags);
 
@@ -667,12 +690,12 @@ export async function generateTiktokMetadata(imagePromptInput: string, motionPro
     const response = await ai.models.generateContent({
       model: METADATA_MODEL,
       contents: [
-        'You write TikTok post copy for food videos.',
+        'You write TikTok post copy.',
         `Image prompt: ${imagePrompt}`,
         `Motion prompt: ${motionPrompt}`,
         'Return strict JSON only with this exact shape:',
         '{"caption":"string","hashtags":["#tag1"]}',
-        'Rules: caption under 220 characters, one short hook, and 6 to 10 food-related hashtags, each starting with #.',
+        'Rules: caption under 220 characters, one short hook, and 6 to 10 relevant hashtags, each starting with #.',
       ].join('\n'),
       config: {
         responseMimeType: 'application/json',

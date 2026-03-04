@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -19,8 +20,15 @@ export default function Nav() {
         <div className="flex items-center gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">BC</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-red-50 flex items-center justify-center border border-red-100">
+              <Image
+                src="/tomatoonly.png"
+                alt="BiteClub logo"
+                width={32}
+                height={32}
+                className="w-full h-full object-cover"
+                priority
+              />
             </div>
             <span className="text-sm font-bold text-gray-900 hidden sm:inline">
               BiteClub TikTok Poster

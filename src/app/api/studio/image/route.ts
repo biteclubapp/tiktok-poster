@@ -4,6 +4,10 @@ import {
   saveGeneratedImage,
   validatePromptLength,
 } from '@/lib/genai-studio';
+import {
+  DEFAULT_STUDIO_IMAGE_CREATOR_ID,
+  getStudioImageCreatorById,
+} from '@/lib/studio-models';
 
 const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp']);
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10MB
@@ -12,11 +16,16 @@ export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get('content-type') || '';
     let prompt = '';
+    let imageCreatorId = DEFAULT_STUDIO_IMAGE_CREATOR_ID;
     let referenceImage: { imageBytes: Buffer; mimeType: string } | undefined;
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       prompt = typeof formData.get('prompt') === 'string' ? String(formData.get('prompt')).trim() : '';
+      imageCreatorId =
+        typeof formData.get('imageCreator') === 'string'
+          ? String(formData.get('imageCreator')).trim()
+          : DEFAULT_STUDIO_IMAGE_CREATOR_ID;
 
       const file = formData.get('referenceImage');
       if (file instanceof File && file.size > 0) {
@@ -41,6 +50,8 @@ export async function POST(request: NextRequest) {
     } else {
       const body = await request.json();
       prompt = typeof body?.prompt === 'string' ? body.prompt.trim() : '';
+      imageCreatorId =
+        typeof body?.imageCreator === 'string' ? body.imageCreator.trim() : DEFAULT_STUDIO_IMAGE_CREATOR_ID;
     }
 
     const validationError = validatePromptLength(prompt);
@@ -48,7 +59,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const image = await generateStudioImageFromOptionalReference(prompt, referenceImage);
+    const imageCreator = getStudioImageCreatorById(imageCreatorId);
+    if (!imageCreator || !imageCreator.enabled) {
+      return NextResponse.json({ error: 'Invalid image creator' }, { status: 400 });
+    }
+
+    const image = await generateStudioImageFromOptionalReference(prompt, referenceImage, imageCreatorId);
     const { imageId } = await saveGeneratedImage(image);
 
     return NextResponse.json({
