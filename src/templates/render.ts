@@ -1,6 +1,8 @@
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
 import { loadFonts } from '@/lib/fonts';
 import { DishData, TemplateStyle } from '@/types';
 import { WIDTH, HEIGHT, renderCTASlide, imageToBase64, Platform } from './shared';
@@ -93,7 +95,12 @@ export async function generateCarousel(
 ): Promise<Buffer[]> {
   const { hero, ingredients, steps } = templateMap[template];
 
-  // Load fonts + fetch hero image in parallel
+  // Load fonts + fetch hero image + logo in parallel
+  const logoPath = path.join(process.cwd(), 'public', 'tomatoonly.png');
+  const logoBase64 = fs.existsSync(logoPath)
+    ? `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`
+    : '';
+
   const [fonts, heroImageBase64] = await Promise.all([
     getFonts(),
     dish.heroImageUrl ? imageToBase64(dish.heroImageUrl) : Promise.resolve(''),
@@ -116,7 +123,7 @@ export async function generateCarousel(
 
   // Skip CTA slide for Reddit
   if (platform !== 'reddit') {
-    slides.push({ element: renderCTASlide(template), name: 'cta' });
+    slides.push({ element: renderCTASlide(template, logoBase64), name: 'cta' });
   }
 
   // Render all slides in parallel

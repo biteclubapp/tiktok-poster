@@ -117,7 +117,7 @@ export interface SlideProps {
 }
 
 // CTA Slide — same for all templates
-export function renderCTASlide(style: 'A' | 'B' | 'C'): React.ReactElement {
+export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): React.ReactElement {
   const isB = style === 'B';
   const bgColor = isB ? '#111' : style === 'C' ? '#FFF8F0' : '#FAFAF8';
   const textColor = isB ? '#fff' : style === 'C' ? '#2a2018' : '#1a1a1a';
@@ -178,20 +178,25 @@ export function renderCTASlide(style: 'A' | 'B' | 'C'): React.ReactElement {
         />
       )}
 
-      {/* BiteClub logo circle */}
-      <div
-        style={{
-          width: 120,
-          height: 120,
-          borderRadius: 60,
-          background: '#E63946',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 60,
-        }}
-      >
-        <div style={{ color: '#fff', fontSize: 48, fontWeight: 700 }}>BC</div>
+      {/* BiteClub logo */}
+      <div style={{ width: 160, height: 160, marginBottom: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {logoBase64 ? (
+          <img src={logoBase64} width={160} height={160} style={{ width: 160, height: 160, objectFit: 'contain' }} />
+        ) : (
+          <div
+            style={{
+              width: 160,
+              height: 160,
+              borderRadius: 80,
+              background: '#E63946',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div style={{ color: '#fff', fontSize: 48, fontWeight: 700 }}>BC</div>
+          </div>
+        )}
       </div>
 
       {/* Brand name */}
@@ -220,7 +225,7 @@ export function renderCTASlide(style: 'A' | 'B' | 'C'): React.ReactElement {
           marginBottom: 80,
         }}
       >
-        Follow for more recipes
+        The Strava for cooking — follow friends & discover yourself through what you cook.
       </div>
 
       {/* App store badges */}
