@@ -18,8 +18,21 @@ interface MetadataResponse {
 const ALLOWED_REFERENCE_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp']);
 const MAX_REFERENCE_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 
+function normalizeImageMimeType(mimeType: string): string {
+  const normalized = mimeType.toLowerCase().split(';')[0].trim();
+  if (normalized === 'image/jpg') return 'image/jpeg';
+  return normalized;
+}
+
+function extensionFromMimeType(mimeType: string): string {
+  if (mimeType === 'image/jpeg') return 'jpg';
+  if (mimeType === 'image/webp') return 'webp';
+  return 'png';
+}
+
 export default function StudioPage() {
   const [imagePrompt, setImagePrompt] = useState('');
+  const [editImagePrompt, setEditImagePrompt] = useState('');
   const [motionPrompt, setMotionPrompt] = useState('');
   const [imageCreatorId, setImageCreatorId] = useState(DEFAULT_STUDIO_IMAGE_CREATOR_ID);
   const [videoCreatorId, setVideoCreatorId] = useState(DEFAULT_STUDIO_VIDEO_CREATOR_ID);
@@ -39,6 +52,7 @@ export default function StudioPage() {
   const [hashtags, setHashtags] = useState<string[]>([]);
 
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [imageGenerationMode, setImageGenerationMode] = useState<'generate' | 'edit' | null>(null);
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [generatingMetadata, setGeneratingMetadata] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -112,16 +126,14 @@ export default function StudioPage() {
     };
   }, [referenceImageFile]);
 
-  async function generateImage() {
+  async function runImageGeneration(
+    mode: 'generate' | 'edit',
+    prompt: string,
+    sourceReferenceImage: File | null
+  ): Promise<boolean> {
     setErrorMessage(null);
-
-    const prompt = imagePrompt.trim();
-    if (prompt.length < 8 || prompt.length > 800) {
-      setErrorMessage('Image prompt must be 8-800 characters.');
-      return;
-    }
-
     setGeneratingImage(true);
+    setImageGenerationMode(mode);
     setImageId(null);
     setImageUrl(null);
     setVideoJobId(null);
@@ -135,8 +147,8 @@ export default function StudioPage() {
       const formData = new FormData();
       formData.append('prompt', prompt);
       formData.append('imageCreator', imageCreatorId);
-      if (referenceImageFile) {
-        formData.append('referenceImage', referenceImageFile);
+      if (sourceReferenceImage) {
+        formData.append('referenceImage', sourceReferenceImage);
       }
 
       const res = await fetch('/api/studio/image', {
@@ -151,14 +163,72 @@ export default function StudioPage() {
 
       setImageId(data.imageId);
       setImageUrl(data.imageUrl);
+      setImagePrompt(prompt);
 
       if (!motionPrompt.trim()) {
         setMotionPrompt('Cinematic 9:16 TikTok video using this image as the hero frame, with smooth camera movement and rich visual detail.');
       }
+
+      return true;
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Image generation failed');
+      return false;
     } finally {
       setGeneratingImage(false);
+      setImageGenerationMode(null);
+    }
+  }
+
+  async function generateImage() {
+    setErrorMessage(null);
+
+    const prompt = imagePrompt.trim();
+    if (prompt.length < 8 || prompt.length > 800) {
+      setErrorMessage('Image prompt must be 8-800 characters.');
+      return;
+    }
+
+    await runImageGeneration('generate', prompt, referenceImageFile);
+  }
+
+  async function editGeneratedImage() {
+    setErrorMessage(null);
+
+    if (!imageUrl) {
+      setErrorMessage('Generate an image first.');
+      return;
+    }
+
+    const prompt = editImagePrompt.trim();
+    if (prompt.length < 8 || prompt.length > 800) {
+      setErrorMessage('Edit prompt must be 8-800 characters.');
+      return;
+    }
+
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error('Failed to load generated image for editing.');
+      }
+
+      const blob = await response.blob();
+      const mimeType = normalizeImageMimeType(response.headers.get('content-type') || blob.type || 'image/png');
+      if (!ALLOWED_REFERENCE_IMAGE_TYPES.has(mimeType)) {
+        throw new Error('Generated image format is not supported for editing.');
+      }
+
+      const referenceFile = new File(
+        [blob],
+        `studio-generated-reference.${extensionFromMimeType(mimeType)}`,
+        { type: mimeType }
+      );
+
+      const success = await runImageGeneration('edit', prompt, referenceFile);
+      if (success) {
+        setEditImagePrompt('');
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to edit generated image');
     }
   }
 
@@ -410,7 +480,7 @@ export default function StudioPage() {
               disabled={generatingImage}
               className="w-full px-4 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {generatingImage ? 'Generating image...' : 'Generate Image'}
+              {generatingImage && imageGenerationMode === 'generate' ? 'Generating image...' : 'Generate Image'}
             </button>
 
             <header className="flex items-center gap-2 pt-2">
@@ -473,11 +543,34 @@ export default function StudioPage() {
                 <div>
                   <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Image</p>
                   {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt="Generated studio image"
-                      className="w-full aspect-[9/16] object-cover rounded-xl border border-gray-200 bg-gray-100"
-                    />
+                    <div className="space-y-3">
+                      <img
+                        src={imageUrl}
+                        alt="Generated studio image"
+                        className="w-full aspect-[9/16] object-cover rounded-xl border border-gray-200 bg-gray-100"
+                      />
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1 block">Edit this image</label>
+                        <textarea
+                          value={editImagePrompt}
+                          onChange={(e) => setEditImagePrompt(e.target.value)}
+                          rows={3}
+                          placeholder="Example: Keep framing, but make the scene look rainy and cinematic"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 resize-none"
+                        />
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <p className="text-xs text-gray-400">{editImagePrompt.length}/800</p>
+                          <button
+                            onClick={editGeneratedImage}
+                            disabled={generatingImage || editImagePrompt.trim().length < 8 || editImagePrompt.trim().length > 800}
+                            className="px-3 py-2 rounded-lg text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {generatingImage && imageGenerationMode === 'edit' ? 'Applying edit...' : 'Apply Edit'}
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">Uses the current generated image as the reference.</p>
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-full aspect-[9/16] rounded-xl border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-sm text-gray-400">
                       No image yet
