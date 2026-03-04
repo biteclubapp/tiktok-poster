@@ -1,7 +1,7 @@
 import {
   GoogleGenAI,
+  GenerateVideosOperation,
   type GenerateContentResponse,
-  type GenerateVideosOperation,
   type Video,
 } from '@google/genai';
 import { randomUUID } from 'crypto';
@@ -32,11 +32,12 @@ const IMAGE_MIME_BY_EXT: Record<(typeof IMAGE_EXTS)[number], string> = {
 const UUID_LIKE_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 type StudioJobStatus = 'processing' | 'completed' | 'failed';
+type StudioOperationPayload = Pick<GenerateVideosOperation, 'name' | 'metadata' | 'done' | 'error' | 'response'>;
 
 export interface StudioVideoJob {
   jobId: string;
   status: StudioJobStatus;
-  operationPayload: GenerateVideosOperation | null;
+  operationPayload: StudioOperationPayload | null;
   imageId: string;
   imagePath: string;
   motionPrompt: string;
@@ -387,14 +388,24 @@ function operationErrorMessage(operation: GenerateVideosOperation): string {
   }
 }
 
-function toOperationPayload(operation: GenerateVideosOperation): GenerateVideosOperation {
+function toOperationPayload(operation: GenerateVideosOperation): StudioOperationPayload {
   return {
     name: operation.name,
     metadata: operation.metadata,
     done: operation.done,
     error: operation.error,
     response: operation.response,
-  } as GenerateVideosOperation;
+  };
+}
+
+function toSdkOperation(operation: StudioOperationPayload): GenerateVideosOperation {
+  const sdkOperation = new GenerateVideosOperation();
+  sdkOperation.name = operation.name;
+  sdkOperation.metadata = operation.metadata;
+  sdkOperation.done = operation.done;
+  sdkOperation.error = operation.error;
+  sdkOperation.response = operation.response;
+  return sdkOperation;
 }
 
 export function isValidStudioId(id: unknown): id is string {
@@ -539,9 +550,13 @@ export async function startStudioVideoFromImage(args: {
   });
 }
 
-export async function pollVideoOperation(operation: GenerateVideosOperation): Promise<GenerateVideosOperation> {
+export async function pollVideoOperation(operation: StudioOperationPayload): Promise<GenerateVideosOperation> {
+  if (!operation?.name) {
+    throw new Error('Missing operation name for video polling.');
+  }
+
   const ai = getAiClient();
-  return ai.operations.getVideosOperation({ operation });
+  return ai.operations.getVideosOperation({ operation: toSdkOperation(operation) });
 }
 
 export async function downloadVideoFile(video: Video, outputPath: string): Promise<void> {
