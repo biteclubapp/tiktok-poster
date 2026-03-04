@@ -55,3 +55,5 @@ next-env.d.ts
 *.db
 *.db-shm
 *.db-wal
+
+*tmp
