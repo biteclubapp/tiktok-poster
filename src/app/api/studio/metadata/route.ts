@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateTiktokMetadata, validatePromptLength } from '@/lib/genai-studio';
+import { generateTiktokMetadata, getApiKeyHelp, validatePromptLength } from '@/lib/genai-studio';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,8 +22,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(metadata);
   } catch (error) {
     console.error('Studio metadata generation error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to generate metadata';
+    const apiKeyHelp = getApiKeyHelp(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate metadata' },
+      apiKeyHelp ? { error: message, apiKeyHelp } : { error: message },
       { status: 500 }
     );
   }

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   finalizeVideoJob,
+  getApiKeyHelp,
   isValidStudioId,
   loadVideoJob,
   pollVideoOperation,
   saveVideoJob,
 } from '@/lib/genai-studio';
+import { DEFAULT_STUDIO_VIDEO_DURATION_SECONDS } from '@/lib/studio-models';
 
 export async function GET(
   _request: NextRequest,
@@ -28,13 +30,17 @@ export async function GET(
         status: 'completed',
         videoId: job.videoId,
         videoUrl: `/api/studio/videos/${job.videoId}`,
+        durationSeconds: job.durationSeconds ?? DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
       });
     }
 
     if (job.status === 'failed') {
+      const apiKeyHelp = getApiKeyHelp(job.error || '');
       return NextResponse.json({
         status: 'failed',
         error: job.error || 'Video generation failed',
+        durationSeconds: job.durationSeconds ?? DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
+        ...(apiKeyHelp ? { apiKeyHelp } : {}),
       });
     }
 
@@ -42,7 +48,11 @@ export async function GET(
       job.status = 'failed';
       job.error = 'Missing operation payload for this job.';
       await saveVideoJob(job);
-      return NextResponse.json({ status: 'failed', error: job.error }, { status: 500 });
+      const apiKeyHelp = getApiKeyHelp(job.error);
+      return NextResponse.json(
+        { status: 'failed', error: job.error, ...(apiKeyHelp ? { apiKeyHelp } : {}) },
+        { status: 500 }
+      );
     }
 
     const operation = await pollVideoOperation(job.operationPayload);
@@ -53,21 +63,30 @@ export async function GET(
         status: 'completed',
         videoId: updatedJob.videoId,
         videoUrl: `/api/studio/videos/${updatedJob.videoId}`,
+        durationSeconds: updatedJob.durationSeconds ?? DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
       });
     }
 
     if (updatedJob.status === 'failed') {
+      const apiKeyHelp = getApiKeyHelp(updatedJob.error || '');
       return NextResponse.json({
         status: 'failed',
         error: updatedJob.error || 'Video generation failed',
+        durationSeconds: updatedJob.durationSeconds ?? DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
+        ...(apiKeyHelp ? { apiKeyHelp } : {}),
       });
     }
 
-    return NextResponse.json({ status: 'processing' });
+    return NextResponse.json({
+      status: 'processing',
+      durationSeconds: updatedJob.durationSeconds ?? DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
+    });
   } catch (error) {
     console.error('Studio video polling error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to fetch video status';
+    const apiKeyHelp = getApiKeyHelp(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to fetch video status' },
+      apiKeyHelp ? { error: message, apiKeyHelp } : { error: message },
       { status: 500 }
     );
   }

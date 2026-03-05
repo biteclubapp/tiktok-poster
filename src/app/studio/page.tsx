@@ -2,8 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  clampStudioVideoDurationSeconds,
+  DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
   DEFAULT_STUDIO_IMAGE_CREATOR_ID,
   DEFAULT_STUDIO_VIDEO_CREATOR_ID,
+  MAX_STUDIO_VIDEO_DURATION_SECONDS,
+  MIN_STUDIO_VIDEO_DURATION_SECONDS,
   STUDIO_IMAGE_CREATORS,
   STUDIO_VIDEO_CREATORS,
 } from '@/lib/studio-models';
@@ -13,6 +17,13 @@ type VideoStatus = 'idle' | 'processing' | 'completed' | 'failed';
 interface MetadataResponse {
   caption: string;
   hashtags: string[];
+}
+
+interface ApiKeyHelpResponse {
+  provider: string;
+  envVar: string;
+  setupUrl: string;
+  label: string;
 }
 
 const ALLOWED_REFERENCE_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp']);
@@ -47,6 +58,8 @@ export default function StudioPage() {
   const [videoId, setVideoId] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>('idle');
+  const [videoDurationSeconds, setVideoDurationSeconds] = useState(DEFAULT_STUDIO_VIDEO_DURATION_SECONDS);
+  const [generatedVideoDurationSeconds, setGeneratedVideoDurationSeconds] = useState(DEFAULT_STUDIO_VIDEO_DURATION_SECONDS);
 
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState<string[]>([]);
@@ -56,6 +69,7 @@ export default function StudioPage() {
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [generatingMetadata, setGeneratingMetadata] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorApiKeyHelp, setErrorApiKeyHelp] = useState<ApiKeyHelpResponse | null>(null);
 
   const hashtagText = useMemo(() => hashtags.join(' '), [hashtags]);
   const selectedImageCreator = useMemo(
@@ -66,6 +80,37 @@ export default function StudioPage() {
     () => STUDIO_VIDEO_CREATORS.find((creator) => creator.id === videoCreatorId) || STUDIO_VIDEO_CREATORS[0],
     [videoCreatorId]
   );
+  const videoDurationOptions = useMemo(
+    () => Array.from(
+      { length: MAX_STUDIO_VIDEO_DURATION_SECONDS - MIN_STUDIO_VIDEO_DURATION_SECONDS + 1 },
+      (_, index) => index + MIN_STUDIO_VIDEO_DURATION_SECONDS
+    ),
+    []
+  );
+
+  const readApiKeyHelp = useCallback((payload: unknown): ApiKeyHelpResponse | null => {
+    if (!payload || typeof payload !== 'object') return null;
+    const value = payload as Record<string, unknown>;
+    const help = value.apiKeyHelp;
+    if (!help || typeof help !== 'object') return null;
+    const helpValue = help as Record<string, unknown>;
+
+    if (
+      typeof helpValue.provider !== 'string'
+      || typeof helpValue.envVar !== 'string'
+      || typeof helpValue.setupUrl !== 'string'
+      || typeof helpValue.label !== 'string'
+    ) {
+      return null;
+    }
+
+    return {
+      provider: helpValue.provider,
+      envVar: helpValue.envVar,
+      setupUrl: helpValue.setupUrl,
+      label: helpValue.label,
+    };
+  }, []);
 
   const applyReferenceImage = useCallback((file: File) => {
     const type = (file.type || '').toLowerCase();
@@ -132,6 +177,7 @@ export default function StudioPage() {
     sourceReferenceImage: File | null
   ): Promise<boolean> {
     setErrorMessage(null);
+    setErrorApiKeyHelp(null);
     setGeneratingImage(true);
     setImageGenerationMode(mode);
     setImageId(null);
@@ -140,6 +186,7 @@ export default function StudioPage() {
     setVideoId(null);
     setVideoUrl(null);
     setVideoStatus('idle');
+    setGeneratedVideoDurationSeconds(videoDurationSeconds);
     setCaption('');
     setHashtags([]);
 
@@ -158,6 +205,7 @@ export default function StudioPage() {
 
       const data = await res.json();
       if (!res.ok) {
+        setErrorApiKeyHelp(readApiKeyHelp(data));
         throw new Error(data.error || 'Image generation failed');
       }
 
@@ -193,6 +241,7 @@ export default function StudioPage() {
 
   async function editGeneratedImage() {
     setErrorMessage(null);
+    setErrorApiKeyHelp(null);
 
     if (!imageUrl) {
       setErrorMessage('Generate an image first.');
@@ -234,6 +283,7 @@ export default function StudioPage() {
 
   async function generateVideo() {
     setErrorMessage(null);
+    setErrorApiKeyHelp(null);
 
     if (!imageId) {
       setErrorMessage('Generate an image first.');
@@ -245,6 +295,9 @@ export default function StudioPage() {
       setErrorMessage('Motion prompt must be 8-800 characters.');
       return;
     }
+    const durationSeconds = clampStudioVideoDurationSeconds(videoDurationSeconds);
+    setVideoDurationSeconds(durationSeconds);
+    setGeneratedVideoDurationSeconds(durationSeconds);
 
     setGeneratingVideo(true);
     setVideoJobId(null);
@@ -258,11 +311,12 @@ export default function StudioPage() {
       const res = await fetch('/api/studio/video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageId, motionPrompt: prompt, videoCreator: videoCreatorId }),
+        body: JSON.stringify({ imageId, motionPrompt: prompt, durationSeconds, videoCreator: videoCreatorId }),
       });
 
       const data = await res.json();
       if (!res.ok) {
+        setErrorApiKeyHelp(readApiKeyHelp(data));
         throw new Error(data.error || 'Video generation failed to start');
       }
 
@@ -278,6 +332,7 @@ export default function StudioPage() {
 
   const generateMetadata = useCallback(async (currentImagePrompt: string, currentMotionPrompt: string) => {
     setGeneratingMetadata(true);
+    setErrorApiKeyHelp(null);
     try {
       const res = await fetch('/api/studio/metadata', {
         method: 'POST',
@@ -287,6 +342,7 @@ export default function StudioPage() {
 
       const data = await res.json();
       if (!res.ok) {
+        setErrorApiKeyHelp(readApiKeyHelp(data));
         throw new Error(data.error || 'Failed to generate caption');
       }
 
@@ -298,7 +354,7 @@ export default function StudioPage() {
     } finally {
       setGeneratingMetadata(false);
     }
-  }, []);
+  }, [readApiKeyHelp]);
 
   useEffect(() => {
     if (!videoJobId || videoStatus !== 'processing') return;
@@ -311,7 +367,12 @@ export default function StudioPage() {
         const data = await res.json();
 
         if (!res.ok) {
+          setErrorApiKeyHelp(readApiKeyHelp(data));
           throw new Error(data.error || 'Failed to fetch video status');
+        }
+
+        if (typeof data.durationSeconds === 'number') {
+          setGeneratedVideoDurationSeconds(clampStudioVideoDurationSeconds(data.durationSeconds));
         }
 
         if (cancelled) return;
@@ -326,6 +387,7 @@ export default function StudioPage() {
 
         if (data.status === 'failed') {
           setVideoStatus('failed');
+          setErrorApiKeyHelp(readApiKeyHelp(data));
           setErrorMessage(data.error || 'Video generation failed');
           return;
         }
@@ -345,12 +407,13 @@ export default function StudioPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [videoJobId, videoStatus, generateMetadata, imagePrompt, motionPrompt]);
+  }, [videoJobId, videoStatus, generateMetadata, imagePrompt, motionPrompt, readApiKeyHelp]);
 
   async function copyText(text: string, label: string) {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
+      setErrorApiKeyHelp(null);
       setErrorMessage(`Failed to copy ${label}.`);
     }
   }
@@ -361,13 +424,23 @@ export default function StudioPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
           <h1 className="text-2xl font-bold text-gray-900">AI Studio</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {selectedImageCreator?.label} to {selectedVideoCreator?.label} for TikTok. Format is locked to 9:16, 8 seconds.
+            {selectedImageCreator?.label} to {selectedVideoCreator?.label} for TikTok. Format is locked to 9:16 with configurable duration.
           </p>
         </div>
 
         {errorMessage && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-            {errorMessage}
+            <p>{errorMessage}</p>
+            {errorApiKeyHelp && (
+              <a
+                href={errorApiKeyHelp.setupUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block mt-2 text-red-700 underline font-medium"
+              >
+                {errorApiKeyHelp.label} ({errorApiKeyHelp.envVar})
+              </a>
+            )}
           </div>
         )}
 
@@ -523,12 +596,27 @@ export default function StudioPage() {
               <p className="text-xs text-gray-400 mt-1">{motionPrompt.length}/800</p>
             </div>
 
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Duration (seconds)</label>
+              <select
+                value={videoDurationSeconds}
+                onChange={(e) => setVideoDurationSeconds(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
+              >
+                {videoDurationOptions.map((seconds) => (
+                  <option key={seconds} value={seconds}>
+                    {seconds}s
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               onClick={generateVideo}
               disabled={!imageId || generatingVideo || generatingImage}
               className="w-full px-4 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {generatingVideo || videoStatus === 'processing' ? 'Generating video...' : 'Generate 9:16 Video (8s)'}
+              {generatingVideo || videoStatus === 'processing' ? 'Generating video...' : `Generate 9:16 Video (${videoDurationSeconds}s)`}
             </button>
           </section>
 
@@ -604,7 +692,7 @@ export default function StudioPage() {
                   >
                     Download MP4
                   </a>
-                  <span className="text-xs text-gray-400">TikTok-ready: 9:16, 8s</span>
+                  <span className="text-xs text-gray-400">TikTok-ready: 9:16, {generatedVideoDurationSeconds}s</span>
                 </div>
               )}
             </div>

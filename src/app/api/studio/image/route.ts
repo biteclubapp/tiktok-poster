@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  getApiKeyHelp,
   generateStudioImageFromOptionalReference,
   saveGeneratedImage,
   validatePromptLength,
@@ -74,8 +75,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Studio image generation error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to generate image';
+    const apiKeyHelp = getApiKeyHelp(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate image' },
+      apiKeyHelp ? { error: message, apiKeyHelp } : { error: message },
       { status: 500 }
     );
   }

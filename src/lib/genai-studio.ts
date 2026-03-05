@@ -9,6 +9,7 @@ import { constants as fsConstants } from 'fs';
 import { access, mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import {
+  DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
   DEFAULT_STUDIO_IMAGE_CREATOR_ID,
   getStudioImageCreatorById,
   type StudioImageCreatorOption,
@@ -44,6 +45,7 @@ export interface StudioVideoJob {
   imageId: string;
   imagePath: string;
   motionPrompt: string;
+  durationSeconds?: number;
   videoId?: string;
   videoPath?: string;
   error?: string;
@@ -60,6 +62,43 @@ interface GeneratedImageResult {
 interface StudioMetadataResult {
   caption: string;
   hashtags: string[];
+}
+
+export interface StudioApiKeyHelp {
+  provider: 'google-ai-studio' | 'openrouter';
+  envVar: 'GEMINI_API_KEY' | 'OPENROUTER_API_KEY';
+  setupUrl: string;
+  label: string;
+}
+
+export function getApiKeyHelp(error: unknown): StudioApiKeyHelp | null {
+  const message = typeof error === 'string'
+    ? error
+    : error instanceof Error
+      ? error.message
+      : '';
+
+  if (!message) return null;
+
+  if (message.includes('OPENROUTER_API_KEY')) {
+    return {
+      provider: 'openrouter',
+      envVar: 'OPENROUTER_API_KEY',
+      setupUrl: 'https://openrouter.ai/keys',
+      label: 'Get an OpenRouter API key',
+    };
+  }
+
+  if (message.includes('GEMINI_API_KEY') || message.includes('GOOGLE_API_KEY')) {
+    return {
+      provider: 'google-ai-studio',
+      envVar: 'GEMINI_API_KEY',
+      setupUrl: 'https://aistudio.google.com/app/apikey',
+      label: 'Get a Google AI Studio API key',
+    };
+  }
+
+  return null;
 }
 
 function getGeminiApiKey(): string {
@@ -558,6 +597,7 @@ export async function startStudioVideoFromImage(args: {
   prompt: string;
   imageBytes: Buffer;
   mimeType: string;
+  durationSeconds?: number;
 }): Promise<GenerateVideosOperation> {
   const ai = getAiClient();
 
@@ -570,7 +610,7 @@ export async function startStudioVideoFromImage(args: {
     },
     config: {
       aspectRatio: '9:16',
-      durationSeconds: 8,
+      durationSeconds: args.durationSeconds ?? DEFAULT_STUDIO_VIDEO_DURATION_SECONDS,
     },
   });
 }
@@ -597,6 +637,7 @@ export async function createVideoJob(args: {
   imageId: string;
   imagePath: string;
   motionPrompt: string;
+  durationSeconds: number;
   operation: GenerateVideosOperation;
 }): Promise<StudioVideoJob> {
   await ensureStudioDirs();
@@ -609,6 +650,7 @@ export async function createVideoJob(args: {
     imageId: args.imageId,
     imagePath: args.imagePath,
     motionPrompt: normalizePrompt(args.motionPrompt),
+    durationSeconds: args.durationSeconds,
     createdAt: now,
     updatedAt: now,
   };
