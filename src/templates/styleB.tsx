@@ -4,7 +4,7 @@ import { WIDTH, HEIGHT, SlideProps, getIngredientEmoji, getStepSizing, getIngred
 // Style B: "Dark & Premium"
 // Dark bg (#111), red left-edge bar, Cormorant Garamond headings
 
-export function styleBHero({ dish, heroImageBase64 }: SlideProps): React.ReactElement {
+export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): React.ReactElement {
   return (
     <div
       style={{
@@ -57,30 +57,32 @@ export function styleBHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
       />
 
       {/* BITECLUB badge - top right */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 48,
-          right: 48,
-          background: 'rgba(0,0,0,0.6)',
-          borderRadius: 18,
-          padding: '15px 30px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 18,
-        }}
-      >
-        <span
+      {platform !== 'reddit' && (
+        <div
           style={{
-            color: '#E63946',
-            fontSize: 30,
-            fontWeight: 700,
-            letterSpacing: '0.1em',
+            position: 'absolute',
+            top: 48,
+            right: 48,
+            background: 'rgba(0,0,0,0.6)',
+            borderRadius: 18,
+            padding: '15px 30px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 18,
           }}
         >
-          BITECLUB
-        </span>
-      </div>
+          <span
+            style={{
+              color: '#E63946',
+              fontSize: 30,
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+            }}
+          >
+            BITECLUB
+          </span>
+        </div>
+      )}
 
       {/* Title overlay - bottom */}
       <div

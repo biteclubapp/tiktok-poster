@@ -108,7 +108,7 @@ export function getIngredientEmoji(ingredient: string): string {
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 
-export type Platform = 'tiktok' | 'reddit';
+export type Platform = 'tiktok' | 'reddit' | 'instagram';
 
 export interface SlideProps {
   dish: DishData;
@@ -268,15 +268,23 @@ export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): Rea
   );
 }
 
+// In-memory cache for fetched images (avoids re-downloading on every carousel generation)
+const imageBase64Cache = new Map<string, string>();
+
 // Helper: fetch and convert image to base64 data URI for embedding in Satori
 export async function imageToBase64(url: string): Promise<string> {
+  const cached = imageBase64Cache.get(url);
+  if (cached) return cached;
+
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
     const buffer = await response.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
     const contentType = response.headers.get('content-type') || 'image/jpeg';
-    return `data:${contentType};base64,${base64}`;
+    const dataUri = `data:${contentType};base64,${base64}`;
+    imageBase64Cache.set(url, dataUri);
+    return dataUri;
   } catch (error) {
     console.error('Error converting image to base64:', error);
     return '';

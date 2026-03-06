@@ -73,3 +73,11 @@ export interface RedditTokens {
   expires_at: number;
   username: string;
 }
+
+export interface InstagramTokens {
+  access_token: string;
+  user_id: string;
+  expires_at: number;
+  username: string;
+  page_id: string;
+}

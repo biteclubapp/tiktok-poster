@@ -48,6 +48,10 @@ next-env.d.ts
 .reddit-tokens.json
 .reddit-state.json
 
+# Instagram tokens & state
+.instagram-tokens.json
+.instagram-state.json
+
 # Generated carousel images
 /tmp/carousel/
 

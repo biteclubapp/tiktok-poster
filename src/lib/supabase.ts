@@ -38,7 +38,8 @@ export async function fetchDishes(limit = 200, search?: string) {
           prep_time,
           servings,
           ingredients_text,
-          instructions
+          instructions,
+          simplified_instructions
         )
       )
     `)
@@ -75,8 +76,8 @@ export async function fetchDishes(limit = 200, search?: string) {
         // Parse ingredients_text — can be array of strings or array of JSON strings
         const ingredients = parseIngredients(recipe.ingredients_text);
 
-        // Parse instructions — can be JSON array of {step, text} or plain text
-        const instructions = parseInstructions(recipe.instructions);
+        // Parse instructions — prefer simplified_instructions for carousel consistency
+        const instructions = parseInstructions(recipe.simplified_instructions || recipe.instructions);
 
         return {
           id: recipe.id,

@@ -8,6 +8,7 @@ import CarouselPreview from '@/components/CarouselPreview';
 import PostControls from '@/components/PostControls';
 import TikTokAuth from '@/components/TikTokAuth';
 import RedditAuth from '@/components/RedditAuth';
+import InstagramAuth from '@/components/InstagramAuth';
 import ScheduleModal from '@/components/ScheduleModal';
 
 function mealToDishData(meal: Meal, heroImageUrl: string): DishData {
@@ -42,11 +43,17 @@ export default function Home() {
   const [generating, setGenerating] = useState(false);
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [redditConnected, setRedditConnected] = useState(false);
+  const [instagramConnected, setInstagramConnected] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishingReddit, setPublishingReddit] = useState(false);
+  const [publishingInstagram, setPublishingInstagram] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [schedulingCaption, setSchedulingCaption] = useState('');
   const [scheduling, setScheduling] = useState(false);
+
+  const dishData = selectedMeal
+    ? { ...mealToDishData(selectedMeal, heroImageUrl), recipeName: editedTitle }
+    : undefined;
 
   function handleSelectMeal(meal: Meal) {
     setSelectedMeal(meal);
@@ -152,6 +159,50 @@ export default function Home() {
     }
   }
 
+  async function publishToInstagram(caption: string) {
+    if (!selectedMeal || slides.length === 0) return;
+
+    setPublishingInstagram(true);
+    try {
+      // Generate Instagram carousel (with branding, same as TikTok)
+      const dishData = { ...mealToDishData(selectedMeal, heroImageUrl), recipeName: editedTitle };
+      const genRes = await fetch('/api/carousel/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dishData, template, platform: 'instagram' }),
+      });
+
+      if (!genRes.ok) {
+        const err = await genRes.json();
+        throw new Error(err.error || 'Instagram carousel generation failed');
+      }
+
+      const genData = await genRes.json();
+
+      // Publish to Instagram
+      const res = await fetch('/api/instagram/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slides: genData.slides,
+          caption,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Instagram publishing failed');
+      }
+
+      const data = await res.json();
+      alert(`Posted to Instagram! Post ID: ${data.id}`);
+    } catch (e) {
+      alert('Instagram publishing failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
+    } finally {
+      setPublishingInstagram(false);
+    }
+  }
+
   function handleOpenSchedule(caption: string) {
     setSchedulingCaption(caption);
     setScheduleModalOpen(true);
@@ -195,6 +246,9 @@ export default function Home() {
           </div>
           <div className="w-72">
             <RedditAuth onStatusChange={setRedditConnected} />
+          </div>
+          <div className="w-72">
+            <InstagramAuth onStatusChange={setInstagramConnected} />
           </div>
         </div>
       </div>
@@ -275,13 +329,17 @@ export default function Home() {
                 <PostControls
                   slides={slides}
                   recipeName={selectedMeal?.recipes[0]?.title || 'recipe'}
+                  dishData={dishData}
                   onPublish={publishToTikTok}
                   onSchedule={handleOpenSchedule}
                   onPublishReddit={publishToReddit}
+                  onPublishInstagram={publishToInstagram}
                   tiktokConnected={tiktokConnected}
                   redditConnected={redditConnected}
+                  instagramConnected={instagramConnected}
                   publishing={publishing}
                   publishingReddit={publishingReddit}
+                  publishingInstagram={publishingInstagram}
                 />
               </div>
             )}
