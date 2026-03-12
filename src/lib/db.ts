@@ -108,8 +108,9 @@ export function listScheduledPosts(): ScheduledPost[] {
 
 export function getDuePosts(): ScheduledPost[] {
   const db = getDb();
+  // Exclude queued posts (scheduled_at = 0) — they need to be scheduled first
   return db.prepare(
-    "SELECT * FROM scheduled_posts WHERE status = 'pending' AND scheduled_at <= ?"
+    "SELECT * FROM scheduled_posts WHERE status = 'pending' AND scheduled_at > 0 AND scheduled_at <= ?"
   ).all(Date.now()) as ScheduledPost[];
 }
 

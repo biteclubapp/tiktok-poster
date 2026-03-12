@@ -6,9 +6,11 @@ import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
+  { href: '/streams', label: 'Streams' },
   { href: '/studio', label: 'Studio' },
   { href: '/schedule', label: 'Schedule' },
   { href: '/trending', label: 'Trending' },
+  { href: '/roadmap', label: 'Roadmap' },
 ];
 
 export default function Nav() {
@@ -31,7 +33,7 @@ export default function Nav() {
               />
             </div>
             <span className="text-sm font-bold text-gray-900 hidden sm:inline">
-              BiteClub TikTok Poster
+              BiteClub Poster
             </span>
           </Link>
 

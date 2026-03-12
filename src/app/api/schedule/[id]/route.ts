@@ -47,7 +47,8 @@ export async function PATCH(
       );
     }
 
-    if (scheduledAt && scheduledAt < Date.now()) {
+    // Allow scheduledAt === 0 for queued (unscheduled) posts
+    if (scheduledAt !== undefined && scheduledAt !== 0 && scheduledAt < Date.now()) {
       return NextResponse.json(
         { error: 'Scheduled time must be in the future' },
         { status: 400 }
