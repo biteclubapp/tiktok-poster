@@ -97,6 +97,77 @@ const PRESETS: ContentPreset[] = [
   { id: 'protein_guide', label: 'The Home Cook\'s Protein Guide', emoji: '\u{1F969}', desc: 'How much protein is in everyday ingredients', category: 'knowledge', rendersAs: 'biteclub_stats' },
 ];
 
+// ── TikTok captions: auto-filled when a preset is selected ──────────────────
+
+const TIKTOK_CAPTIONS: Record<string, string> = {
+  // SOCIAL
+  potluck_benefits: "science says potlucks literally make you happier. no notes.\nstart a Potluck Ideas cookbook on BiteClub and share what you're bringing — link in bio.\n#potluck #friendswhocook #foodscience #homecooking #biteclub #cookingtogether",
+  couple_cooking: "couples who cook together stay together. this is peer-reviewed data, not a vibe.\nlog your next date night meal on BiteClub and pin it to your profile — try BiteClub free.\n#couplegoals #cookingtogether #datenight #relationshipadvice #biteclub #homecooking",
+  family_benefits: "cooking with your kids is doing more than you think. vocabulary, confidence, actual life skills.\nbuild a Family Recipes cookbook on BiteClub so the good ones never get lost — link in bio.\n#cookingwithkids #familycooking #parenting #kitchenskills #biteclub #familymeals",
+  dinner_party_science: "hosting isn't just fun. it's neurologically good for you. oxytocin, laughter, the whole deal.\npost your next dinner party spread on BiteClub's Discovery feed and inspire someone else to host — download BiteClub.\n#dinnerparty #hosting #foodscience #homecooking #biteclub #cookingforpeople",
+  loneliness_food: "the #1 predictor of how connected you feel socially? eating together. not texting. eating.\nfollow real home cooks on BiteClub's Discovery feed and cook what they're cooking — link in bio.\n#sharedmeals #loneliness #foodcommunity #homecooking #biteclub #eatwithpeople",
+  cultural_bonding: "cooking someone's food is one of the fastest ways to actually understand them. every time.\nbuild your Cuisines Cooked map on BiteClub — every country you cook from gets a pin — try BiteClub free.\n#culturalexchange #worldcooking #foodempathy #globalfood #biteclub #cuisines",
+
+  // MONEY
+  cost_comparison: "homemade pasta: ~$2. takeout pasta: $18. one of these is also better.\nsee your real Cooking History on BiteClub — every meal you made instead of ordered — download BiteClub.\n#mealprep #savemoney #homecooking #budgetmeals #biteclub #cookathome",
+  yearly_savings: "cook at home 5x a week and you save roughly $3,000 a year. that's a flight somewhere nice.\ntrack your cooking streak on BiteClub — the weekly calendar shows every day you cooked — link in bio.\n#savemoney #homecooking #cookingstreak #budgetfood #biteclub #financetok",
+  meal_prep_roi: "batch cooking Sunday saves you time AND money every single day of the week. the math is embarrassing.\nsave your best batch recipes to a Meal Prep cookbook on BiteClub — try BiteClub free.\n#mealprep #batchcooking #mealplanning #savemoney #biteclub #homecooking",
+  food_waste: "the average household throws away $1,500 of food per year. meal planning cuts that by 70%.\nimport your weekly recipes to BiteClub from any URL and plan before you shop — link in bio.\n#foodwaste #mealplanning #savemoney #sustainability #biteclub #homecooking",
+  coffee_comparison: "daily latte + lunch out = ~$3,200/year. that same money compounded for 10 years is wild.\ncheck your Cooking History on BiteClub — every meal you made is a win that stacks — download BiteClub.\n#lattelevy #savemoney #homecooking #budgeting #biteclub #financetok",
+  grocery_hacks: "going grocery shopping without a list costs you 23% more on average. every single time.\nbuild your weekly Cookbook on BiteClub first, then shop — link in bio.\n#groceryhacks #mealplanning #savemoney #groceryshopping #biteclub #homecooking",
+
+  // HEALTH
+  calorie_truth: "restaurant meals average 1,200 calories. home-cooked: ~550. you literally can't outrun the menu.\nyou control the plate at home — post what you make with a star rating on BiteClub — try BiteClub free.\n#caloriecount #homecooking #healthyeating #eatathome #biteclub #nutritionfacts",
+  portion_truth: "restaurant portions are 2.5x what you actually need. the plate is a lie.\npost your home-cooked portions on BiteClub and let your Flavor Palate fill in as you eat better — link in bio.\n#portioncontrol #homecooking #healthyeating #eatathome #biteclub #nutritiontok",
+  sodium_truth: "one restaurant meal = your entire daily sodium limit. one. meal.\ntrack what you're really eating by logging it on BiteClub — your Cooking History tells the full story — download BiteClub.\n#sodium #hiddenhealth #homecooking #eatclean #biteclub #healthyfood",
+  hidden_ingredients: "the average packaged food has 15+ ingredients you can't pronounce. cooking from scratch fixes that instantly.\ndiscover clean real-food recipes from actual home cooks on BiteClub's Discovery feed — try BiteClub free.\n#cleanfood #knowyourfood #homecooking #ingredients #biteclub #eatreal",
+  gut_health: "home cooks eat 40% more diverse foods than people who eat out regularly. your gut is keeping score.\nwatch your Cuisines Cooked map fill in as you cook more variety — download BiteClub.\n#guthealth #fooddiversity #homecooking #microbiome #biteclub #healthyfood",
+  weight_management: "people who cook at home 5+ times a week weigh 2.5 kg less on average. not a diet. just cooking.\nbuild a cooking streak on BiteClub — the weekly calendar tracks every day you showed up — link in bio.\n#weightmanagement #homecooking #cookingstreak #healthyhabits #biteclub #healthyfood",
+  immune_boost: "fresh herbs, whole foods, real garlic — what you cook with directly feeds your immune system.\nfind home cook recipes built around real ingredients on BiteClub's Discovery feed — try BiteClub free.\n#immunehealth #wholefood #homecooking #eatreal #biteclub #healthyfood",
+
+  // MIND
+  happiness_stats: "people who cook 5+ times a week report 47% higher life satisfaction. 47. percent.\nkeep your streak alive on BiteClub — the weekly calendar shows every day you chose the kitchen — download BiteClub.\n#happinesshacks #homecooking #mentalhealth #cookingstreak #biteclub #lifesatisfaction",
+  stress_relief: "25% lower stress for regular home cooks. chopping onions is cheaper than therapy and the food is better.\npost what you made tonight on BiteClub with a photo and rating — it genuinely helps — link in bio.\n#stressrelief #cookingtherapy #mentalhealth #homecooking #biteclub #selfcare",
+  creativity_brain: "cooking new flavors activates the same brain circuits as making art or music. it's not a metaphor.\nbuild your Flavor Palate on BiteClub — Sweet, Salty, Umami, Spice — watch it shift as you experiment — try BiteClub free.\n#creativity #flavorpalate #homecooking #brainfood #biteclub #cookingscience",
+  screen_detox: "45 minutes in the kitchen = 45 minutes of actual phone-free presence. rare in 2026.\nlog your screen-free cooking session on BiteClub after — your Cooking History is building something real — link in bio.\n#screendetox #digitalwellness #homecooking #presentmoment #biteclub #mindfulness",
+  confidence_data: "every dish you nail is proof you can learn hard things. this compounds fast.\npin your best meals to your BiteClub profile — your Type of Cook badge updates as you grow — download BiteClub.\n#confidence #cookingskills #growthmindset #homecooking #biteclub #selfdevelopment",
+  sleep_quality: "lighter home-cooked dinners with less sodium = measurably better sleep. your body remembers every meal.\npost your evening cook on BiteClub — your Cooking History is slowly becoming your health history — try BiteClub free.\n#sleepquality #homecooking #sleeptips #wellness #biteclub #healthyfood",
+  therapy_cooking: "occupational therapists literally prescribe cooking for anxiety and depression. it's real clinical science.\nexplore therapeutic cooking recipes from real home cooks on BiteClub's Discovery feed — link in bio.\n#cookingtherapy #mentalhealth #anxiety #homecooking #biteclub #wellnesstok",
+  flow_state: "the same brain state as meditation, sport, or music? cooking gets you there in under 10 minutes.\ntrack how often you hit that state — build your weekly streak on BiteClub — download BiteClub.\n#flowstate #homecooking #mindfulness #mentalhealth #biteclub #cookingscience",
+
+  // PROGRESS
+  seven_day_challenge: "7 days of cooking every day changes your relationship with food permanently. we have the data.\ndo the challenge with BiteClub — the streak calendar marks every day you cooked — link in bio.\n#7daychallenge #cookingchallenge #cookingstreak #homecooking #biteclub #habitbuilding",
+  skill_progression: "everyone starts by boiling pasta. everyone. the skill tree is longer than you think.\ncheck your Type of Cook badge on BiteClub — it updates automatically as your cooking history grows — try BiteClub free.\n#cookingskills #learntocook #skilltree #homecooking #biteclub #cookingtips",
+  speed_gains: "you're getting faster in the kitchen and you can't even feel it happening. measurable every month.\nyour Cooking History on BiteClub shows exactly how far you've come — download BiteClub.\n#cookingprogress #kitchenskills #homecooking #speedcooking #biteclub #cookingtips",
+  ten_recipes: "master 10 recipes and you will never stare blankly at your fridge again. 10 is the magic number.\nbuild your personal top 10 as a Cookbook on BiteClub — name it whatever you want — link in bio.\n#tenrecipes #mealideas #homecooking #recipeideas #biteclub #cookingtips",
+  compound_effect: "cook every day for a year and you won't recognize your old habits. the compounding is real.\nwatch your Cuisines Cooked map and Flavor Palate transform over time on BiteClub — try BiteClub free.\n#compoundeffect #habitbuilding #homecooking #cookingstreak #biteclub #growthmindset",
+
+  // DATA (building in public)
+  day_one: "day 1. we're building a cooking app and posting on TikTok to grow it. let's see what happens.\nwe're BiteClub — track your meals, build streaks, find new recipes — download BiteClub (link in bio).\n#buildinpublic #startuptok #cookingapp #indiedev #biteclub #day1",
+  week_one_update: "week 1 update: here's what the numbers actually looked like. no filter.\nif you cook and want to track it properly — BiteClub is the app — link in bio.\n#buildinpublic #startuplife #weekoneupdate #cookingapp #biteclub #growthtok",
+  growth_numbers: "our real numbers, no fluff. this is what early-stage actually looks like.\nwe're building BiteClub for home cooks who take cooking seriously — try it free (link in bio).\n#buildinpublic #realmetrics #startuptok #cookingapp #biteclub #transparency",
+  tiktok_experiment: "genuine question: can TikTok grow a cooking app? we're about to find out in public.\nwe're BiteClub — Strava for home cooks — download it and tell us what you think.\n#tiktokexperiment #buildinpublic #growthhacking #cookingapp #biteclub #startuptok",
+  milestone_hit: "we just hit a milestone. small number, means everything to us.\nBiteClub — the cooking app where you log meals, build streaks, and actually get better — link in bio.\n#milestone #buildinpublic #startupwin #cookingapp #biteclub #smallwins",
+  content_strategy: "this is our exact TikTok content strategy. stealing it is fine, we don't mind.\nwe're using it to grow BiteClub — a cooking app built for people who actually cook — download BiteClub.\n#contentstrategy #tiktokgrowth #buildinpublic #cookingapp #biteclub #marketingtok",
+  where_chefs_cook: "our users are cooking from Malmö to Manila right now. the map is kind of wild.\nyour kitchen goes on the Cuisines Cooked map too — add your first dish on BiteClub — link in bio.\n#globalfood #homecooked #worldcuisine #cookingapp #biteclub #kitchenmap",
+  top_cuisines: "these are the top cuisines being cooked on BiteClub right now. Italian is always up there. always.\nsee what cuisine is missing from your Cuisines Cooked map — discover it on BiteClub — try BiteClub free.\n#worldcuisine #homecooking #cookingtok #cuisines #biteclub #foodtrends",
+  global_kitchen: "from Malmö to Mumbai — real home cooks, real kitchens, real food.\nbrowse the Discovery feed on BiteClub and find your next recipe from someone who actually made it — download BiteClub.\n#globalfood #homecooking #discoveryfeed #worldfood #biteclub #kitchentok",
+
+  // DEBATE
+  this_or_that_food: "tacos vs burritos. pizza vs pasta. pick a side, this is important.\nlog whichever one you make tonight on BiteClub and let your Flavor Palate decide your true loyalty — link in bio.\n#thisorthat #fooddebate #tacos #pizza #biteclub #foodtok",
+  unpopular_opinions: "some of these are genuinely controversial. the comments will confirm.\nif you cook the thing you're defending, post it on BiteClub with a 5-star rating and prove your point — try BiteClub free.\n#unpopularopinion #foodopinions #hottakes #foodtok #biteclub #fooddebate",
+  homemade_vs_store: "some things are absolutely worth making from scratch. some are not. we're settling this.\nsave the ones worth making to a Cookbook on BiteClub — \"Worth Making\" is a great cookbook name — download BiteClub.\n#homemadevsstore #fromscratch #homecooking #recipeideas #biteclub #fooddebate",
+  cuisine_battle: "Italian vs Mexican. Thai vs Japanese. one of these is leaving. choose wisely.\ntrack every cuisine you actually cook on BiteClub — the Cuisines Cooked map shows your real loyalties — link in bio.\n#cuisinebattle #fooddebate #italianfood #mexicanfood #biteclub #foodtok",
+
+  // KNOWLEDGE
+  ingredient_science: "salt doesn't just make things salty. the actual science of what it does to food is kind of mind-blowing.\nfind recipes that teach you WHY, not just how — import any recipe into BiteClub from any URL — try BiteClub free.\n#saltscience #cookingscience #ingredientscience #homecooking #biteclub #cookingtips",
+  seasonal_eating: "in-season produce is 3x cheaper and actually tastes like food. this is the cheat code nobody talks about.\ndiscover seasonal recipes on BiteClub's Discovery feed from cooks who know their produce — link in bio.\n#seasonaleating #eatlocal #freshingredients #homecooking #biteclub #foodscience",
+  pantry_power: "10 pantry staples and you can make dinner every night for a month without thinking.\nbuild your ultimate pantry Cookbook on BiteClub — add every recipe that starts from basics — download BiteClub.\n#pantrychef #pantrymeals #homecooking #mealideas #biteclub #cookingtips",
+  cooking_myths: "searing doesn't lock in juices. we're sorry. there's more where that came from.\nfind recipes built on actual technique in BiteClub's Discovery feed — no myths, just people who cook — try BiteClub free.\n#cookingmyths #foodscience #cookingtips #homecooking #biteclub #kitchenfacts",
+  fermentation: "kimchi, sourdough, yogurt — fermented foods are genuinely a nutritional superpower. the data is stacking up.\nsave your fermentation recipes to a Cookbook on BiteClub before you lose that sourdough discard recipe — link in bio.\n#fermentation #guthealth #kimchi #sourdough #biteclub #healthyfood",
+  protein_guide: "the home cook's guide to protein: what to buy, how to cook it, what it actually costs per gram.\ntrack the protein-heavy dishes you make in your Cooking History on BiteClub — download BiteClub.\n#proteinguide #homecooking #proteinfood #mealprep #biteclub #nutritiontok",
+};
+
 // ── Prefills: every preset gets a fully-loaded data object ──────────────────
 
 type StatsPrefill = { title: string; callout: string; stats: { label: string; value: string; unit: string; nudge?: string }[]; cta?: string; ctaSub?: string; visual?: 'map' | 'bars' | 'ring'; barData?: { label: string; value: number; display?: string }[]; barTitle?: string };
@@ -1435,7 +1506,7 @@ export default function InfoCarouselPage() {
     setSelectedPreset(preset);
     setContentType(preset.rendersAs);
     setSlides([]);
-    setScheduleCaption(preset.label);
+    setScheduleCaption(TIKTOK_CAPTIONS[preset.id] || preset.label);
     setScheduleSuccess(false);
     setScheduleError(null);
     setShowEditForm(false);
