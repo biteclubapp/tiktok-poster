@@ -15,6 +15,8 @@ import sharp from 'sharp';
 import { loadFonts } from '@/lib/fonts';
 import { WIDTH, HEIGHT } from './shared';
 import React from 'react';
+import fs from 'fs';
+import path from 'path';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -1178,26 +1180,43 @@ const DEFAULT_HOTSPOTS: Array<{ label: string; x: number; y: number; size: 'lg' 
   { label: 'India', x: 68, y: 48, size: 'sm' as const },
 ];
 
-const COUNTRY_FLAGS: Record<string, string> = {
-  'United States': '\u{1F1FA}\u{1F1F8}',
-  'Sweden': '\u{1F1F8}\u{1F1EA}',
-  'Denmark': '\u{1F1E9}\u{1F1F0}',
-  'Norway': '\u{1F1F3}\u{1F1F4}',
-  'Netherlands': '\u{1F1F3}\u{1F1F1}',
-  'France': '\u{1F1EB}\u{1F1F7}',
-  'India': '\u{1F1EE}\u{1F1F3}',
-  'Mexico': '\u{1F1F2}\u{1F1FD}',
-  'Portugal': '\u{1F1F5}\u{1F1F9}',
-  'Palestine': '\u{1F1F5}\u{1F1F8}',
-  'Germany': '\u{1F1E9}\u{1F1EA}',
-  'United Kingdom': '\u{1F1EC}\u{1F1E7}',
-  'Spain': '\u{1F1EA}\u{1F1F8}',
-  'Italy': '\u{1F1EE}\u{1F1F9}',
-  'Japan': '\u{1F1EF}\u{1F1F5}',
-  'Australia': '\u{1F1E6}\u{1F1FA}',
-  'Canada': '\u{1F1E8}\u{1F1E6}',
-  'Brazil': '\u{1F1E7}\u{1F1F7}',
+const COUNTRY_CODES: Record<string, string> = {
+  'United States': 'us',
+  'Sweden': 'se',
+  'Denmark': 'dk',
+  'Norway': 'no',
+  'Netherlands': 'nl',
+  'France': 'fr',
+  'India': 'in',
+  'Mexico': 'mx',
+  'Portugal': 'pt',
+  'Palestine': 'ps',
+  'Germany': 'de',
+  'United Kingdom': 'gb',
+  'Spain': 'es',
+  'Italy': 'it',
+  'Japan': 'jp',
+  'Australia': 'au',
+  'Canada': 'ca',
+  'Brazil': 'br',
 };
+
+const flagCache = new Map<string, string>();
+
+function getFlagDataUri(countryName: string): string | null {
+  const code = COUNTRY_CODES[countryName];
+  if (!code) return null;
+  if (flagCache.has(code)) return flagCache.get(code)!;
+  try {
+    const svgPath = path.join(process.cwd(), 'node_modules', 'circle-flags', 'flags', `${code}.svg`);
+    const svg = fs.readFileSync(svgPath);
+    const uri = `data:image/svg+xml;base64,${svg.toString('base64')}`;
+    flagCache.set(code, uri);
+    return uri;
+  } catch {
+    return null;
+  }
+}
 
 function buildMapSlide(
   style: InfoTemplateStyle,
@@ -1240,7 +1259,7 @@ function buildMapSlide(
     const y = gridTop + row * (cardHeight + rowGap);
     const count = sizeToCount[spot.size];
     const barWidth = Math.max(24, (count / maxCount) * (colWidth - 100));
-    const flag = COUNTRY_FLAGS[spot.label] || '\u{1F30D}';
+    const flagSrc = getFlagDataUri(spot.label);
 
     countryCards.push(
       React.createElement('div', {
@@ -1269,13 +1288,27 @@ function buildMapSlide(
             gap: 16,
           },
         },
-          React.createElement('div', {
-            style: {
-              fontSize: 48,
-              display: 'flex',
-              lineHeight: 1,
-            },
-          }, flag),
+          flagSrc
+            ? React.createElement('img', {
+                src: flagSrc,
+                width: 48,
+                height: 48,
+                style: {
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  display: 'flex',
+                },
+              })
+            : React.createElement('div', {
+                style: {
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  background: pal.accent,
+                  display: 'flex',
+                },
+              }),
           React.createElement('div', {
             style: {
               fontSize: 32,
