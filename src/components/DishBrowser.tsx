@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Meal } from '@/types';
 import DishCard from './DishCard';
 
@@ -19,12 +19,9 @@ export default function DishBrowser({
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    fetchDishes();
-  }, []);
-
-  async function fetchDishes(query?: string) {
+  const fetchDishes = useCallback(async (query?: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -39,34 +36,64 @@ export default function DishBrowser({
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchDishes();
+  }, [fetchDishes]);
+
+  // Debounced live search
+  function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    setSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchDishes(value || undefined);
+    }, 400);
   }
 
-  function handleSearch(e: React.FormEvent) {
+  function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
-    fetchDishes(search);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    fetchDishes(search || undefined);
   }
 
   function handleSelectMeal(meal: Meal) {
     onSelectMeal(meal);
-    // Auto-select first image as hero
-    const firstMedia = meal.media[0];
-    if (firstMedia?.signed_url) {
-      onSelectHeroImage(firstMedia.signed_url);
+    // Auto-select first image with a valid signed URL as hero
+    const firstWithUrl = meal.media.find((m) => m.signed_url);
+    if (firstWithUrl?.signed_url) {
+      onSelectHeroImage(firstWithUrl.signed_url);
     }
   }
 
   return (
     <div className="flex flex-col h-full">
       {/* Search */}
-      <form onSubmit={handleSearch} className="mb-4">
+      <form onSubmit={handleSearchSubmit} className="mb-4">
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Search recipes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
-          />
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search recipes..."
+              value={search}
+              onChange={handleSearchChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 pr-8"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  fetchDishes();
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
+                aria-label="Clear search"
+              >
+                &times;
+              </button>
+            )}
+          </div>
           <button
             type="submit"
             className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -100,7 +127,10 @@ export default function DishBrowser({
 
       {!loading && !error && (
         <>
-          <p className="text-xs text-gray-400 mb-3">{meals.length} dishes found</p>
+          <p className="text-xs text-gray-400 mb-3">
+            {meals.length} {meals.length === 1 ? 'dish' : 'dishes'} found
+            {search && <span className="ml-1">for &ldquo;{search}&rdquo;</span>}
+          </p>
           <div className="grid grid-cols-2 gap-3 overflow-y-auto min-h-0 flex-1 pb-4 auto-rows-min">
             {meals.map((meal) => (
               <DishCard
@@ -110,6 +140,22 @@ export default function DishBrowser({
                 onSelect={() => handleSelectMeal(meal)}
               />
             ))}
+            {meals.length === 0 && (
+              <div className="col-span-2 text-center py-12 text-gray-400">
+                <p className="text-sm">No dishes found</p>
+                {search && (
+                  <button
+                    onClick={() => {
+                      setSearch('');
+                      fetchDishes();
+                    }}
+                    className="mt-2 text-xs text-red-500 hover:text-red-700 underline"
+                  >
+                    Clear search
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Photo filmstrip for selected dish */}
@@ -124,6 +170,7 @@ export default function DishBrowser({
                     key={media.id}
                     onClick={() => media.signed_url && onSelectHeroImage(media.signed_url)}
                     className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-red-500 transition-colors"
+                    disabled={!media.signed_url}
                   >
                     {media.signed_url ? (
                       <img
@@ -132,7 +179,9 @@ export default function DishBrowser({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200" />
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                        N/A
+                      </div>
                     )}
                   </button>
                 ))}

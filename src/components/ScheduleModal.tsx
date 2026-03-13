@@ -42,7 +42,8 @@ export default function ScheduleModal({ open, onClose, onSchedule, scheduling }:
       >
         <h3 className="text-lg font-bold text-gray-900 mb-1">Schedule Post</h3>
         <p className="text-sm text-gray-500 mb-4">
-          Choose when this carousel should be published to TikTok.
+          Choose when this carousel should be auto-published to TikTok.
+          Make sure TikTok is connected when the post fires.
         </p>
 
         <form onSubmit={handleSubmit}>

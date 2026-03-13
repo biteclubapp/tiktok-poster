@@ -79,7 +79,7 @@ export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): Rea
               letterSpacing: '0.1em',
             }}
           >
-            BITECLUB
+            The world's best home cooks don't have better ingredients. They have better taste. BiteClub trains yours.
           </span>
         </div>
       )}
@@ -91,7 +91,7 @@ export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): Rea
           bottom: 0,
           left: 0,
           right: 0,
-          padding: '180px 72px 72px',
+          padding: '120px 72px 60px',
           background: 'linear-gradient(transparent, #111 85%)',
           display: 'flex',
           flexDirection: 'column',
@@ -99,7 +99,7 @@ export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): Rea
       >
         <div
           style={{
-            fontSize: 78,
+            fontSize: 66,
             fontWeight: 300,
             color: '#fff',
             fontFamily: 'Cormorant Garamond',
@@ -112,14 +112,14 @@ export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): Rea
         <div
           style={{
             display: 'flex',
-            gap: 48,
-            marginTop: 30,
+            gap: 36,
+            marginTop: 24,
           }}
         >
           <span
             style={{
               color: '#888',
-              fontSize: 36,
+              fontSize: 30,
               fontWeight: 500,
               letterSpacing: '0.05em',
               textTransform: 'uppercase' as const,
@@ -127,11 +127,11 @@ export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): Rea
           >
             {dish.cookTime}
           </span>
-          <span style={{ color: '#444', fontSize: 36 }}>·</span>
+          <span style={{ color: '#444', fontSize: 30 }}>·</span>
           <span
             style={{
               color: '#888',
-              fontSize: 36,
+              fontSize: 30,
               fontWeight: 500,
               letterSpacing: '0.05em',
               textTransform: 'uppercase' as const,
@@ -235,7 +235,7 @@ export function styleBIngredients({ dish, platform }: SlideProps): React.ReactEl
             letterSpacing: '0.1em',
           }}
         >
-          BITECLUB
+          Every great dish started with someone reading this exact kind of list. Save yours somewhere worthy.
         </div>
       )}
     </div>
@@ -343,7 +343,7 @@ export function styleBSteps({ dish, platform }: SlideProps): React.ReactElement 
             letterSpacing: '0.1em',
           }}
         >
-          BITECLUB
+          Cooking is 90% prep and 10% looking confident. BiteClub handles the prep.
         </div>
       )}
     </div>

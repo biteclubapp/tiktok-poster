@@ -39,7 +39,7 @@ const SAMPLE_DISH: DishData = {
 export async function GET(request: NextRequest) {
   const template = (request.nextUrl.searchParams.get('template') || 'A') as TemplateStyle;
 
-  if (!['A', 'B', 'C'].includes(template)) {
+  if (!['A', 'B', 'C', 'D', 'E', 'F'].includes(template)) {
     return NextResponse.json({ error: 'Invalid template' }, { status: 400 });
   }
 

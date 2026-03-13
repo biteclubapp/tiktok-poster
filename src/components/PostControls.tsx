@@ -35,23 +35,28 @@ export default function PostControls({
   publishingReddit,
   publishingInstagram,
 }: PostControlsProps) {
-  const [caption, setCaption] = useState(
-    `${recipeName} \n\nFull recipe in the carousel! Save for later \n\n#cooking #recipe #food #homecooking #biteclub`
-  );
+  const defaultCaption = `${recipeName} \n\nFull recipe in the carousel! Save for later \n\n#cooking #recipe #food #homecooking #biteclub`;
+  const [caption, setCaption] = useState(defaultCaption);
+  const [instagramCaption, setInstagramCaption] = useState(defaultCaption);
+  const [instagramCaptionSynced, setInstagramCaptionSynced] = useState(true);
   const [subreddit, setSubreddit] = useState('');
   const [redditTitle, setRedditTitle] = useState(recipeName);
   const [generatingCaption, setGeneratingCaption] = useState(false);
+  const [generatingInstagramCaption, setGeneratingInstagramCaption] = useState(false);
   const [generatingTitle, setGeneratingTitle] = useState(false);
   const [suggestedSubreddits, setSuggestedSubreddits] = useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const lastRecipeRef = useRef<string>('');
 
-  // Fetch subreddit recommendations when dishData changes
+  // Fetch subreddit recommendations when the dish changes (keyed by recipeName to avoid object reference churn)
+  const recipeNameForEffect = dishData?.recipeName;
   useEffect(() => {
-    if (!dishData?.recipeName || dishData.recipeName === lastRecipeRef.current) return;
-    lastRecipeRef.current = dishData.recipeName;
+    if (!recipeNameForEffect || recipeNameForEffect === lastRecipeRef.current) return;
+    lastRecipeRef.current = recipeNameForEffect;
 
+    if (!dishData) return;
     setLoadingSuggestions(true);
+    setSuggestedSubreddits([]);
     fetch('/api/captions/subreddits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -65,7 +70,8 @@ export default function PostControls({
       })
       .catch(() => {})
       .finally(() => setLoadingSuggestions(false));
-  }, [dishData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipeNameForEffect]);
 
   async function handleGenerateCaption() {
     if (!dishData) return;
@@ -79,10 +85,34 @@ export default function PostControls({
       if (res.ok) {
         const data = await res.json();
         const hashtags = (data.hashtags || []).join(' ');
-        setCaption(`${data.caption}\n\n${hashtags}`);
+        const generated = `${data.caption}\n\n${hashtags}`;
+        setCaption(generated);
+        // Sync to Instagram if the Instagram caption hasn't been manually edited
+        if (instagramCaptionSynced) {
+          setInstagramCaption(generated);
+        }
       }
     } catch {}
     setGeneratingCaption(false);
+  }
+
+  async function handleGenerateInstagramCaption() {
+    if (!dishData) return;
+    setGeneratingInstagramCaption(true);
+    try {
+      const res = await fetch('/api/captions/tiktok', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dishData }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const hashtags = (data.hashtags || []).join(' ');
+        setInstagramCaption(`${data.caption}\n\n${hashtags}`);
+        setInstagramCaptionSynced(false);
+      }
+    } catch {}
+    setGeneratingInstagramCaption(false);
   }
 
   async function handleGenerateTitle() {
@@ -270,16 +300,16 @@ export default function PostControls({
 
         <button
           onClick={() => onPublishReddit(redditTitle, subreddit)}
-          disabled={!redditConnected || slides.length === 0 || publishingReddit || !subreddit.trim()}
+          disabled={!redditConnected || publishingReddit || !subreddit.trim() || !dishData}
           className="w-full px-4 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {publishingReddit ? (
             <span className="flex items-center justify-center gap-2">
               <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-              Publishing to Reddit...
+              Generating &amp; publishing to Reddit...
             </span>
           ) : redditConnected ? (
-            'Post to Reddit'
+            subreddit.trim() ? 'Post to Reddit' : 'Choose a subreddit first'
           ) : (
             'Connect Reddit First'
           )}
@@ -292,10 +322,54 @@ export default function PostControls({
       {/* Instagram Section */}
       <div className="space-y-4">
         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Instagram</h3>
-        <p className="text-xs text-gray-400">Uses same caption as TikTok</p>
+
+        {/* Instagram Caption */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">Caption</label>
+            <div className="flex items-center gap-3">
+              {instagramCaptionSynced && (
+                <span className="text-xs text-gray-400">Synced from TikTok</span>
+              )}
+              {dishData && (
+                <button
+                  onClick={handleGenerateInstagramCaption}
+                  disabled={generatingInstagramCaption}
+                  className="text-xs text-pink-500 hover:text-pink-700 font-medium disabled:opacity-50"
+                >
+                  {generatingInstagramCaption ? 'Generating...' : 'Generate Caption'}
+                </button>
+              )}
+            </div>
+          </div>
+          <textarea
+            value={instagramCaption}
+            onChange={(e) => {
+              setInstagramCaption(e.target.value);
+              setInstagramCaptionSynced(false);
+            }}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 resize-none"
+            placeholder="Write a caption..."
+          />
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs text-gray-400">{instagramCaption.length}/2200 characters</p>
+            {!instagramCaptionSynced && (
+              <button
+                onClick={() => {
+                  setInstagramCaption(caption);
+                  setInstagramCaptionSynced(true);
+                }}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                Reset to TikTok caption
+              </button>
+            )}
+          </div>
+        </div>
 
         <button
-          onClick={() => onPublishInstagram?.(caption)}
+          onClick={() => onPublishInstagram?.(instagramCaption)}
           disabled={!instagramConnected || slides.length === 0 || publishingInstagram}
           className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
         >

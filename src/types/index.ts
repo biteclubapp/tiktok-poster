@@ -48,7 +48,7 @@ export interface DishData {
   ingredientCount: number;
 }
 
-export type TemplateStyle = 'A' | 'B' | 'C';
+export type TemplateStyle = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 
 export interface CarouselRequest {
   dishData: DishData;

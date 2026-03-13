@@ -53,6 +53,7 @@ export interface BiteClubStatsData {
     value: string;
     unit?: string;
     hero?: boolean;     // mark one stat as the hero — displayed giant on its own slide
+    nudge?: string;     // BiteClub tie-in line shown below the stat
   }>;
   callout?: string;     // e.g. "Most popular dish: Chicken Couscous"
   source?: string;      // e.g. "Source: Johns Hopkins Study, 2024"
@@ -60,6 +61,9 @@ export interface BiteClubStatsData {
   emoji?: string;       // decorative emoji rendered large & semi-transparent on slides
   cta?: string;         // custom CTA headline for final slide
   ctaSub?: string;      // custom CTA subtitle for final slide
+  visual?: 'map' | 'bars' | 'ring';  // optional creative visual slide type
+  barData?: Array<{ label: string; value: number; display?: string }>;
+  barTitle?: string;
 }
 
 export interface ThisOrThatData {
@@ -319,67 +323,82 @@ function buildCoverSlide(
 }
 
 function buildCtaSlide(style: InfoTemplateStyle, pal: Palette, ctaText?: string, ctaSubtext?: string): React.ReactElement {
-  return (
+  const children: React.ReactElement[] = [];
+
+  // Top accent bar
+  children.push(
     React.createElement('div', {
+      key: 'accent-bar',
       style: {
-        width: WIDTH, height: HEIGHT,
-        background: pal.bg,
-        fontFamily: 'DM Sans',
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: 9,
+        background: pal.accent,
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: 48,
       }
-    },
-      // Top accent bar
-      React.createElement('div', {
-        style: {
-          position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: 9,
-          background: pal.accent,
-          display: 'flex',
-        }
-      }),
-
-      React.createElement('div', {
-        style: {
-          fontSize: 58,
-          fontWeight: 700,
-          color: pal.text,
-          fontFamily: getHeadlineFont(style),
-          textAlign: 'center',
-          lineHeight: 1.2,
-          maxWidth: 820,
-          marginBottom: 32,
-        }
-      }, ctaText || 'Join the club'),
-
-      React.createElement('div', {
-        style: {
-          fontSize: 32,
-          fontWeight: 400,
-          color: pal.muted,
-          textAlign: 'center',
-          lineHeight: 1.5,
-          maxWidth: 780,
-          marginBottom: 54,
-        }
-      }, ctaSubtext || 'Cook together. Share your creations. Discover new favorites.'),
-
-      React.createElement('div', {
-        style: {
-          fontSize: 34,
-          fontWeight: 800,
-          color: pal.accent,
-          letterSpacing: '0.04em',
-        }
-      }, '@biteclub.app')
-    )
+    })
   );
+
+  // CTA headline
+  children.push(
+    React.createElement('div', {
+      key: 'cta-headline',
+      style: {
+        fontSize: 58,
+        fontWeight: 700,
+        color: pal.text,
+        fontFamily: getHeadlineFont(style),
+        textAlign: 'center',
+        lineHeight: 1.2,
+        maxWidth: 820,
+        marginBottom: 32,
+      }
+    }, ctaText || 'Join the club')
+  );
+
+  // CTA subtitle
+  children.push(
+    React.createElement('div', {
+      key: 'cta-sub',
+      style: {
+        fontSize: 32,
+        fontWeight: 400,
+        color: pal.muted,
+        textAlign: 'center',
+        lineHeight: 1.5,
+        maxWidth: 780,
+        marginBottom: 54,
+      }
+    }, ctaSubtext || 'Cook together. Share your creations. Discover new favorites.')
+  );
+
+  // Handle
+  children.push(
+    React.createElement('div', {
+      key: 'handle',
+      style: {
+        fontSize: 34,
+        fontWeight: 800,
+        color: pal.accent,
+        letterSpacing: '0.04em',
+      }
+    }, '@biteclub.app')
+  );
+
+  return React.createElement('div', {
+    style: {
+      width: WIDTH, height: HEIGHT,
+      background: pal.bg,
+      fontFamily: 'DM Sans',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: 48,
+    }
+  }, ...children);
 }
 
 // ── Cook Together slides ────────────────────────────────────────────────────
@@ -735,7 +754,36 @@ function buildHeroStatSlide(
           marginTop: 48,
           display: 'flex',
         }
-      })
+      }),
+
+      // BiteClub feature callout card
+      stat.nudge ? React.createElement('div', {
+        style: {
+          background: `${pal.accent}15`,
+          borderRadius: getCardRadius(style),
+          borderLeft: `5px solid ${pal.accent}`,
+          padding: '24px 32px',
+          marginTop: 36,
+          maxWidth: 780,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }
+      },
+        React.createElement('div', {
+          style: {
+            fontSize: 20, fontWeight: 800, color: pal.accent,
+            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+            display: 'flex',
+          }
+        }, 'ON BITECLUB'),
+        React.createElement('div', {
+          style: {
+            fontSize: 26, fontWeight: 500, color: pal.text,
+            textAlign: 'left', lineHeight: 1.45, display: 'flex',
+          }
+        }, stat.nudge)
+      ) : null
     ),
   ]);
 }
@@ -831,7 +879,35 @@ function buildStatPairSlide(
             stat.unit ? React.createElement('span', {
               style: { fontSize: 42, fontWeight: 500, color: pal.muted }
             }, stat.unit) : null
-          )
+          ),
+
+          // BiteClub feature callout
+          stat.nudge ? React.createElement('div', {
+            style: {
+              background: `${pal.accent}12`,
+              borderRadius: Math.round(getCardRadius(style) * 0.6),
+              borderLeft: `4px solid ${pal.accent}`,
+              padding: '16px 20px',
+              marginTop: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+            }
+          },
+            React.createElement('div', {
+              style: {
+                fontSize: 18, fontWeight: 800, color: pal.accent,
+                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+                display: 'flex',
+              }
+            }, 'ON BITECLUB'),
+            React.createElement('div', {
+              style: {
+                fontSize: 22, fontWeight: 500, color: pal.text,
+                lineHeight: 1.4, display: 'flex',
+              }
+            }, stat.nudge)
+          ) : null
         )
       )
     ),
@@ -910,7 +986,34 @@ function buildStatTripleSlide(
         featured.unit ? React.createElement('span', {
           style: { fontSize: 44, fontWeight: 500, color: pal.muted }
         }, featured.unit) : null
-      )
+      ),
+      // BiteClub feature callout
+      featured.nudge ? React.createElement('div', {
+        style: {
+          background: `${pal.accent}12`,
+          borderRadius: Math.round(getCardRadius(style) * 0.6),
+          borderLeft: `4px solid ${pal.accent}`,
+          padding: '16px 20px',
+          marginTop: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+        }
+      },
+        React.createElement('div', {
+          style: {
+            fontSize: 18, fontWeight: 800, color: pal.accent,
+            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+            display: 'flex',
+          }
+        }, 'ON BITECLUB'),
+        React.createElement('div', {
+          style: {
+            fontSize: 22, fontWeight: 500, color: pal.text,
+            lineHeight: 1.4, display: 'flex',
+          }
+        }, featured.nudge)
+      ) : null
     ),
 
     // Two supporting stats side by side
@@ -957,7 +1060,34 @@ function buildStatTripleSlide(
             stat.unit ? React.createElement('span', {
               style: { fontSize: 32, fontWeight: 500, color: pal.muted }
             }, stat.unit) : null
-          )
+          ),
+          // BiteClub feature callout
+          stat.nudge ? React.createElement('div', {
+            style: {
+              background: `${pal.accent}12`,
+              borderRadius: Math.round(getCardRadius(style) * 0.5),
+              borderLeft: `3px solid ${pal.accent}`,
+              padding: '12px 14px',
+              marginTop: 6,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+            }
+          },
+            React.createElement('div', {
+              style: {
+                fontSize: 14, fontWeight: 800, color: pal.accent,
+                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+                display: 'flex',
+              }
+            }, 'ON BITECLUB'),
+            React.createElement('div', {
+              style: {
+                fontSize: 18, fontWeight: 500, color: pal.text,
+                lineHeight: 1.35, display: 'flex',
+              }
+            }, stat.nudge)
+          ) : null
         )
       )
     ),
@@ -1037,70 +1167,660 @@ function buildCalloutSlide(
   ]);
 }
 
-/** Key takeaway slide: big bold message that summarizes everything */
-function buildTakeawaySlide(
+// ── Creative visual slide builders ──────────────────────────────────────────
+
+const DEFAULT_HOTSPOTS: Array<{ label: string; x: number; y: number; size: 'lg' | 'md' | 'sm' }> = [
+  { label: 'United States', x: 22, y: 42, size: 'lg' as const },
+  { label: 'Denmark', x: 52, y: 30, size: 'md' as const },
+  { label: 'Sweden', x: 53, y: 28, size: 'md' as const },
+  { label: 'Norway', x: 51, y: 24, size: 'sm' as const },
+  { label: 'France', x: 49, y: 36, size: 'sm' as const },
+  { label: 'India', x: 68, y: 48, size: 'sm' as const },
+];
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  'United States': '\u{1F1FA}\u{1F1F8}',
+  'Sweden': '\u{1F1F8}\u{1F1EA}',
+  'Denmark': '\u{1F1E9}\u{1F1F0}',
+  'Norway': '\u{1F1F3}\u{1F1F4}',
+  'Netherlands': '\u{1F1F3}\u{1F1F1}',
+  'France': '\u{1F1EB}\u{1F1F7}',
+  'India': '\u{1F1EE}\u{1F1F3}',
+  'Mexico': '\u{1F1F2}\u{1F1FD}',
+  'Portugal': '\u{1F1F5}\u{1F1F9}',
+  'Palestine': '\u{1F1F5}\u{1F1F8}',
+  'Germany': '\u{1F1E9}\u{1F1EA}',
+  'United Kingdom': '\u{1F1EC}\u{1F1E7}',
+  'Spain': '\u{1F1EA}\u{1F1F8}',
+  'Italy': '\u{1F1EE}\u{1F1F9}',
+  'Japan': '\u{1F1EF}\u{1F1F5}',
+  'Australia': '\u{1F1E6}\u{1F1FA}',
+  'Canada': '\u{1F1E8}\u{1F1E6}',
+  'Brazil': '\u{1F1E7}\u{1F1F7}',
+};
+
+function buildMapSlide(
   style: InfoTemplateStyle,
   pal: Palette,
-  takeaway: string,
-  source: string | undefined,
+  hotspots: Array<{ label: string; x: number; y: number; size: 'lg' | 'md' | 'sm' }>,
 ): React.ReactElement {
+  const isDark = style === 'B' || style === 'D';
+  const cardBg = isDark ? pal.surface : 'rgba(0,0,0,0.04)';
+  const cardRadius = getCardRadius(style);
+
+  // Sort by size priority (lg > md > sm) and take top 6
+  const sizePriority = { lg: 3, md: 2, sm: 1 };
+  const topSix = [...hotspots]
+    .sort((a, b) => sizePriority[b.size] - sizePriority[a.size])
+    .slice(0, 6);
+
+  // Map size to display count
+  const sizeToCount: Record<string, number> = { lg: 421, md: 86, sm: 14 };
+  const sizeToLabel: Record<string, string> = { lg: '400+ cooks', md: '20+ cooks', sm: '5+ cooks' };
+  const maxCount = Math.max(...topSix.map(s => sizeToCount[s.size]));
+
+  // Border thickness: top countries get thicker left border
+  const sizeToBorder: Record<string, number> = { lg: 6, md: 4, sm: 3 };
+
+  // Grid layout constants
+  const gridTop = 340;
+  const gridLeft = 72;
+  const gridRight = 72;
+  const colGap = 28;
+  const rowGap = 24;
+  const colWidth = (WIDTH - gridLeft - gridRight - colGap) / 2;
+  const cardHeight = 178;
+
+  // Build country cards
+  const countryCards: React.ReactElement[] = [];
+  topSix.forEach((spot, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = gridLeft + col * (colWidth + colGap);
+    const y = gridTop + row * (cardHeight + rowGap);
+    const count = sizeToCount[spot.size];
+    const barWidth = Math.max(24, (count / maxCount) * (colWidth - 100));
+    const flag = COUNTRY_FLAGS[spot.label] || '\u{1F30D}';
+
+    countryCards.push(
+      React.createElement('div', {
+        key: `card-${i}`,
+        style: {
+          position: 'absolute',
+          top: y,
+          left: x,
+          width: colWidth,
+          height: cardHeight,
+          background: cardBg,
+          borderRadius: cardRadius,
+          borderLeft: `${sizeToBorder[spot.size]}px solid ${pal.accent}`,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          padding: '0 32px',
+          gap: 10,
+        },
+      },
+        // Top row: flag + country name
+        React.createElement('div', {
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+          },
+        },
+          React.createElement('div', {
+            style: {
+              fontSize: 48,
+              display: 'flex',
+              lineHeight: 1,
+            },
+          }, flag),
+          React.createElement('div', {
+            style: {
+              fontSize: 32,
+              fontWeight: 700,
+              color: pal.text,
+              display: 'flex',
+            },
+          }, spot.label),
+        ),
+        // Count pill
+        React.createElement('div', {
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          },
+        },
+          React.createElement('div', {
+            style: {
+              background: pal.accent,
+              color: pal.accentText,
+              fontSize: 20,
+              fontWeight: 700,
+              padding: '4px 16px',
+              borderRadius: 999,
+              display: 'flex',
+            },
+          }, sizeToLabel[spot.size]),
+        ),
+        // Mini bar chart
+        React.createElement('div', {
+          style: {
+            display: 'flex',
+            width: '100%',
+            height: 8,
+            borderRadius: 4,
+            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            overflow: 'hidden',
+          },
+        },
+          React.createElement('div', {
+            style: {
+              width: barWidth,
+              height: 8,
+              borderRadius: 4,
+              background: pal.accent,
+              opacity: 1 - i * 0.08,
+              display: 'flex',
+            },
+          }),
+        ),
+      )
+    );
+  });
+
+  // Bottom stats
+  const bottomStats = [
+    { value: `${hotspots.length}`, label: 'Countries' },
+    { value: '580+', label: 'Active Cooks' },
+    { value: '120+', label: 'Meals This Week' },
+  ];
+
+  return React.createElement('div', {
+    style: {
+      width: WIDTH,
+      height: HEIGHT,
+      background: pal.bg,
+      fontFamily: 'DM Sans',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: 48,
+    },
+  },
+    // Top accent bar
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: 12,
+        background: pal.accent,
+        display: 'flex',
+      },
+    }),
+
+    // Header area
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        top: 70, left: 72, right: 72,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+      },
+    },
+      React.createElement('div', {
+        style: {
+          fontSize: 26,
+          fontWeight: 800,
+          color: pal.accent,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase' as const,
+          display: 'flex',
+        },
+      }, 'WHERE BITECLUB COOKS'),
+      React.createElement('div', {
+        style: {
+          width: 60, height: 4,
+          background: pal.accent,
+          borderRadius: 2,
+          display: 'flex',
+        },
+      }),
+      React.createElement('div', {
+        style: {
+          fontSize: 28,
+          fontWeight: 400,
+          color: pal.muted,
+          marginTop: 8,
+          display: 'flex',
+        },
+      }, 'Real cooks from around the world'),
+    ),
+
+    // Country cards grid
+    ...countryCards,
+
+    // Bottom stats row
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        bottom: 72, left: 72, right: 72,
+        display: 'flex',
+        gap: 20,
+      },
+    },
+      ...bottomStats.map((stat, i) =>
+        React.createElement('div', {
+          key: `bstat-${i}`,
+          style: {
+            flex: 1,
+            background: cardBg,
+            borderRadius: cardRadius,
+            padding: '28px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 6,
+          },
+        },
+          React.createElement('div', {
+            style: {
+              fontSize: 36,
+              fontWeight: 800,
+              color: pal.accent,
+              display: 'flex',
+            },
+          }, stat.value),
+          React.createElement('div', {
+            style: {
+              fontSize: 20,
+              fontWeight: 500,
+              color: pal.muted,
+              display: 'flex',
+            },
+          }, stat.label),
+        )
+      )
+    ),
+  );
+}
+
+function buildBarChartSlide(
+  style: InfoTemplateStyle,
+  pal: Palette,
+  title: string,
+  bars: Array<{ label: string; value: number; display?: string }>,
+): React.ReactElement {
+  const isDark = style === 'B' || style === 'D';
+  const maxValue = Math.max(...bars.map(b => b.value), 1);
+  const maxBarWidth = WIDTH * 0.60;  // 80% of slide width for the longest bar
+  const barHeight = 56;
+  const barGap = 20;
+  const startY = 320;
+  const labelWidth = 220;
+  const barLeft = 80 + labelWidth + 20;
+
+  const barElements: React.ReactElement[] = [];
+  bars.forEach((bar, i) => {
+    const y = startY + i * (barHeight + barGap);
+    const barWidth = Math.max(40, (bar.value / maxValue) * maxBarWidth);
+    const opacity = Math.max(0.35, 1 - i * 0.12);
+    const rowBg = i % 2 === 0
+      ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)')
+      : 'transparent';
+
+    // Alternating row background
+    barElements.push(
+      React.createElement('div', {
+        key: `row-bg-${i}`,
+        style: {
+          position: 'absolute',
+          top: y - 8,
+          left: 60,
+          right: 60,
+          height: barHeight + 16,
+          borderRadius: 12,
+          background: rowBg,
+          display: 'flex',
+        },
+      })
+    );
+
+    // Label
+    barElements.push(
+      React.createElement('div', {
+        key: `label-${i}`,
+        style: {
+          position: 'absolute',
+          top: y,
+          left: 80,
+          width: labelWidth,
+          height: barHeight,
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: 28,
+          fontWeight: 600,
+          color: pal.text,
+        },
+      }, bar.label)
+    );
+
+    // Bar
+    barElements.push(
+      React.createElement('div', {
+        key: `bar-${i}`,
+        style: {
+          position: 'absolute',
+          top: y + 6,
+          left: barLeft,
+          width: barWidth,
+          height: barHeight - 12,
+          borderRadius: (barHeight - 12) / 2,
+          background: i === 0 ? pal.accent : pal.accent,
+          opacity,
+          display: 'flex',
+        },
+      })
+    );
+
+    // Value display
+    barElements.push(
+      React.createElement('div', {
+        key: `value-${i}`,
+        style: {
+          position: 'absolute',
+          top: y,
+          left: barLeft + barWidth + 16,
+          height: barHeight,
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: 26,
+          fontWeight: 700,
+          color: i === 0 ? pal.accent : pal.muted,
+        },
+      }, bar.display || String(bar.value))
+    );
+  });
+
+  return React.createElement('div', {
+    style: {
+      width: WIDTH,
+      height: HEIGHT,
+      background: pal.bg,
+      fontFamily: 'DM Sans',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: 48,
+    },
+  },
+    // Top accent bar
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: 12,
+        background: pal.accent,
+        display: 'flex',
+      },
+    }),
+
+    // Title area
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        top: 70, left: 80, right: 80,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+      },
+    },
+      React.createElement('div', {
+        style: {
+          fontSize: 26,
+          fontWeight: 800,
+          color: pal.accent,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase' as const,
+          display: 'flex',
+        },
+      }, title),
+      React.createElement('div', {
+        style: {
+          width: 60, height: 4,
+          background: pal.accent,
+          borderRadius: 2,
+          display: 'flex',
+        },
+      })
+    ),
+
+    // Rank numbers on the left
+    ...bars.map((_, i) =>
+      React.createElement('div', {
+        key: `rank-${i}`,
+        style: {
+          position: 'absolute',
+          top: startY + i * (barHeight + barGap),
+          left: 80,
+          height: barHeight,
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: 22,
+          fontWeight: 800,
+          color: i === 0 ? pal.accent : pal.muted,
+          opacity: 0.5,
+        },
+      }, `#${i + 1}`)
+    ),
+
+    // Bars
+    ...barElements,
+
+    // Footer accent line
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        bottom: 80, left: 80,
+        width: 80, height: 4,
+        background: pal.accent,
+        borderRadius: 2,
+        display: 'flex',
+      },
+    }),
+    React.createElement('div', {
+      style: {
+        position: 'absolute',
+        bottom: 96, left: 80,
+        fontSize: 22,
+        fontWeight: 500,
+        color: pal.muted,
+        display: 'flex',
+      },
+    }, '@biteclub.app')
+  );
+}
+
+function buildRingGaugeSlide(
+  style: InfoTemplateStyle,
+  pal: Palette,
+  stat: { label: string; value: string; unit?: string; nudge?: string },
+  source?: string,
+): React.ReactElement {
+  const isDark = style === 'B' || style === 'D';
+  const ringSize = 360;
+  const outerGlowSize = 420;
+  const innerDetailSize = 300;
 
   return buildStatSlideWrapper(style, pal, source, [
+    // Section label
     React.createElement('div', {
-      key: 'takeaway-center',
+      key: 'ring-label',
+      style: {
+        fontSize: 26, fontWeight: 800, color: pal.accent,
+        letterSpacing: '0.12em', textTransform: 'uppercase' as const,
+        marginBottom: 20, display: 'flex',
+      },
+    }, 'KEY STAT'),
+
+    // Centered ring + number block
+    React.createElement('div', {
+      key: 'ring-center',
       style: {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '0 20px',
-      }
+      },
     },
-      // Top accent line
+      // Ring container (relative for layering)
       React.createElement('div', {
         style: {
-          width: 60, height: 6,
-          background: pal.accent,
-          borderRadius: 3,
-          marginBottom: 52,
+          width: outerGlowSize,
+          height: outerGlowSize,
           display: 'flex',
-        }
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        },
+      },
+        // Outer glow ring
+        React.createElement('div', {
+          style: {
+            position: 'absolute',
+            top: 0, left: 0,
+            width: outerGlowSize,
+            height: outerGlowSize,
+            borderRadius: outerGlowSize / 2,
+            border: `2px solid ${pal.accent}`,
+            opacity: 0.15,
+            display: 'flex',
+          },
+        }),
+
+        // Main accent ring
+        React.createElement('div', {
+          style: {
+            position: 'absolute',
+            top: (outerGlowSize - ringSize) / 2,
+            left: (outerGlowSize - ringSize) / 2,
+            width: ringSize,
+            height: ringSize,
+            borderRadius: ringSize / 2,
+            border: `14px solid ${pal.accent}`,
+            display: 'flex',
+          },
+        }),
+
+        // Inner detail ring
+        React.createElement('div', {
+          style: {
+            position: 'absolute',
+            top: (outerGlowSize - innerDetailSize) / 2,
+            left: (outerGlowSize - innerDetailSize) / 2,
+            width: innerDetailSize,
+            height: innerDetailSize,
+            borderRadius: innerDetailSize / 2,
+            border: `2px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}`,
+            display: 'flex',
+          },
+        }),
+
+        // Value centered inside ring
+        React.createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+        },
+          React.createElement('div', {
+            style: {
+              fontSize: 120,
+              fontWeight: 900,
+              color: pal.text,
+              fontFamily: getHeadlineFont(style),
+              lineHeight: 1.0,
+              letterSpacing: '-0.04em',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'center',
+            },
+          },
+            stat.value,
+            stat.unit ? React.createElement('span', {
+              style: {
+                fontSize: 48,
+                fontWeight: 500,
+                color: pal.muted,
+                marginLeft: 8,
+              },
+            }, stat.unit) : null
+          )
+        )
+      ),
+
+      // Label below the ring
+      React.createElement('div', {
+        style: {
+          fontSize: 38,
+          fontWeight: 500,
+          color: pal.muted,
+          textAlign: 'center',
+          marginTop: 36,
+          lineHeight: 1.4,
+          maxWidth: 700,
+          display: 'flex',
+        },
+      }, stat.label),
+
+      // Accent line
+      React.createElement('div', {
+        style: {
+          width: 60, height: 4,
+          background: pal.accent,
+          borderRadius: 2,
+          marginTop: 32,
+          display: 'flex',
+        },
       }),
 
-      // Section label
-      React.createElement('div', {
+      // BiteClub nudge card
+      stat.nudge ? React.createElement('div', {
         style: {
-          fontSize: 26, fontWeight: 800, color: pal.accent,
-          letterSpacing: '0.14em', textTransform: 'uppercase' as const,
-          marginBottom: 40, display: 'flex',
-        }
-      }, 'KEY TAKEAWAY'),
-
-      // Big takeaway text
-      React.createElement('div', {
-        style: {
-          fontSize: 58,
-          fontWeight: style === 'E' ? 300 : 800,
-          color: pal.text,
-          fontFamily: getHeadlineFont(style),
-          textAlign: 'center',
-          lineHeight: 1.25,
-          letterSpacing: '-0.02em',
-          maxWidth: 840,
-        }
-      }, takeaway),
-
-      // Bottom accent line
-      React.createElement('div', {
-        style: {
-          width: 60, height: 6,
-          background: pal.accent,
-          borderRadius: 3,
-          marginTop: 52,
+          background: `${pal.accent}15`,
+          borderRadius: getCardRadius(style),
+          borderLeft: `5px solid ${pal.accent}`,
+          padding: '24px 32px',
+          marginTop: 32,
+          maxWidth: 780,
           display: 'flex',
-        }
-      })
+          flexDirection: 'column',
+          gap: 8,
+        },
+      },
+        React.createElement('div', {
+          style: {
+            fontSize: 20, fontWeight: 800, color: pal.accent,
+            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+            display: 'flex',
+          },
+        }, 'ON BITECLUB'),
+        React.createElement('div', {
+          style: {
+            fontSize: 26, fontWeight: 500, color: pal.text,
+            textAlign: 'left', lineHeight: 1.45, display: 'flex',
+          },
+        }, stat.nudge)
+      ) : null
     ),
   ]);
 }
@@ -1118,18 +1838,29 @@ function buildBiteClubStatsSlides(data: BiteClubStatsData, style: InfoTemplateSt
     'BiteClub Data',
   ));
 
-  // 2. Separate hero stat(s) from regular stats
+  // 2. Visual slide insertion (map, bars, or ring replaces hero)
+  if (data.visual === 'map') {
+    slides.push(buildMapSlide(style, pal, DEFAULT_HOTSPOTS));
+  } else if (data.visual === 'bars' && data.barData && data.barData.length > 0) {
+    slides.push(buildBarChartSlide(style, pal, data.barTitle || 'RANKINGS', data.barData));
+  }
+
+  // 3. Separate hero stat(s) from regular stats
   const heroStat = data.stats.find(s => s.hero);
   const regularStats = data.stats.filter(s => !s.hero);
 
-  // 3. Hero stat slide (if one is marked, or if there's only 1 stat)
-  if (heroStat) {
+  // 4. Hero stat slide — use ring gauge if visual === 'ring', otherwise standard hero
+  if (data.visual === 'ring' && heroStat) {
+    slides.push(buildRingGaugeSlide(style, pal, heroStat, source));
+  } else if (data.visual === 'ring' && data.stats.length === 1) {
+    slides.push(buildRingGaugeSlide(style, pal, data.stats[0], source));
+  } else if (heroStat) {
     slides.push(buildHeroStatSlide(style, pal, heroStat, source));
   } else if (data.stats.length === 1) {
     slides.push(buildHeroStatSlide(style, pal, data.stats[0], source));
   }
 
-  // 4. Regular stats — split into slides of 2-3 for readability
+  // 5. Regular stats — split into slides of 2-3 for readability
   const statsToLayout = heroStat ? regularStats : (data.stats.length === 1 ? [] : regularStats.length > 0 ? regularStats : data.stats);
 
   if (statsToLayout.length > 0) {
@@ -1169,17 +1900,7 @@ function buildBiteClubStatsSlides(data: BiteClubStatsData, style: InfoTemplateSt
     });
   }
 
-  // 5. Callout banner slide (if callout exists)
-  if (data.callout) {
-    slides.push(buildCalloutSlide(style, pal, data.callout, source));
-  }
-
-  // 6. Key takeaway slide (if provided, shown before CTA)
-  if (data.takeaway) {
-    slides.push(buildTakeawaySlide(style, pal, data.takeaway, source));
-  }
-
-  // 7. CTA
+  // 6. Combined takeaway + CTA — callout merged into CTA as takeaway
   slides.push(buildCtaSlide(style, pal, data.cta, data.ctaSub));
   return slides;
 }

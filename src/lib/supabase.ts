@@ -45,7 +45,7 @@ export async function fetchDishes(limit = 200, search?: string) {
     `)
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
-    .limit(limit);
+    .limit(search ? limit * 2 : limit); // Fetch more when searching so local filter has room
 
   const { data, error } = await query;
 
@@ -114,18 +114,20 @@ export async function fetchDishes(limit = 200, search?: string) {
       };
     });
 
-  // Search filter
+  // Search filter — searches caption, description, and recipe titles
   if (search) {
     const lower = search.toLowerCase();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return meals.filter((meal: any) => {
+    const filtered = meals.filter((meal: any) => {
       const caption = (meal.caption || '').toLowerCase();
+      const description = (meal.description || '').toLowerCase();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const recipeMatch = meal.recipes.some((r: any) =>
         (r.title || '').toLowerCase().includes(lower)
       );
-      return caption.includes(lower) || recipeMatch;
+      return caption.includes(lower) || description.includes(lower) || recipeMatch;
     });
+    return filtered.slice(0, limit);
   }
 
   return meals;

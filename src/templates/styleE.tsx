@@ -45,7 +45,7 @@ export function styleEHero({ dish, heroImageBase64, platform }: SlideProps): Rea
             letterSpacing: '0.18em',
           }}
         >
-          BITECLUB
+          Cooking the same rotation is normal. Knowing there's better out there and doing nothing is a choice. BiteClub.
         </div>
       )}
 
@@ -271,7 +271,7 @@ export function styleEIngredients({ dish, platform }: SlideProps): React.ReactEl
               letterSpacing: '0.18em',
             }}
           >
-            BITECLUB
+            The ingredient list is where most people give up. The ones who don't eat much better. BiteClub helps.
           </div>
         </div>
       )}
@@ -418,7 +418,7 @@ export function styleESteps({ dish, platform }: SlideProps): React.ReactElement 
               letterSpacing: '0.18em',
             }}
           >
-            BITECLUB
+            Step-by-step is the difference between dinner and a disaster. BiteClub keeps you on track.
           </div>
         </div>
       )}

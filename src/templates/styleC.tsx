@@ -4,7 +4,7 @@ import { WIDTH, HEIGHT, SlideProps, getIngredientEmoji, getStepSizing, getIngred
 // Style C: "Warm & Friendly"
 // Cream bg (#FFF8F0), rounded elements, 2-column ingredients, DM Serif Display
 
-export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactElement {
+export function styleCHero({ dish, heroImageBase64, platform }: SlideProps): React.ReactElement {
   return (
     <div
       style={{
@@ -23,7 +23,7 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
       <div
         style={{
           margin: '48px 48px 0',
-          height: 1200,
+          height: 900,
           borderRadius: 42,
           overflow: 'hidden',
           position: 'relative',
@@ -46,7 +46,7 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
       </div>
 
       {/* Info area */}
-      <div style={{ padding: '48px 72px 60px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <div style={{ padding: '36px 72px 48px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div
           style={{
             display: 'flex',
@@ -57,7 +57,7 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             <div
               style={{
-                fontSize: 66,
+                fontSize: 54,
                 fontWeight: 700,
                 color: '#2a2018',
                 fontFamily: 'DM Serif Display',
@@ -68,8 +68,8 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
             <div
               style={{
                 display: 'flex',
-                gap: 30,
-                marginTop: 18,
+                gap: 24,
+                marginTop: 16,
                 alignItems: 'center',
               }}
             >
@@ -77,19 +77,24 @@ export function styleCHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
                 style={{
                   background: '#E63946',
                   color: '#fff',
-                  fontSize: 31,
+                  fontSize: 27,
                   fontWeight: 700,
-                  padding: '9px 24px',
+                  padding: '8px 20px',
                   borderRadius: 12,
                   letterSpacing: '0.03em',
                 }}
               >
                 {dish.cookTime.toUpperCase()}
               </div>
-              <div style={{ color: '#a09080', fontSize: 37 }}>
+              <div style={{ color: '#a09080', fontSize: 31 }}>
                 {`${dish.ingredientCount} ingredients · ${dish.stepCount} steps`}
               </div>
             </div>
+            {platform !== 'reddit' && (
+              <div style={{ color: '#c4b4a0', fontSize: 27, fontWeight: 500, marginTop: 14 }}>
+                Cooking at home 5x a week saves around $3,000 a year. BiteClub makes it a lot easier to want to.
+              </div>
+            )}
           </div>
 
         </div>
@@ -210,7 +215,7 @@ export function styleCIngredients({ dish, platform }: SlideProps): React.ReactEl
               letterSpacing: '0.12em',
             }}
           >
-            BITECLUB
+            A grocery list built from real recipes wastes almost nothing. That's BiteClub doing its thing.
           </div>
         </div>
       )}
@@ -344,7 +349,7 @@ export function styleCSteps({ dish, platform }: SlideProps): React.ReactElement 
               letterSpacing: '0.12em',
             }}
           >
-            BITECLUB
+            The best part about following steps with a friend? You can blame them if it goes wrong. Try BiteClub.
           </div>
         </div>
       )}

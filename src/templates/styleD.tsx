@@ -113,14 +113,15 @@ export function styleDHero({ dish, heroImageBase64, platform }: SlideProps): Rea
         {/* Category label */}
         <div
           style={{
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: 700,
             color: '#E63946',
-            letterSpacing: '0.2em',
+            letterSpacing: '0.08em',
+            lineHeight: 1.4,
             marginBottom: 24,
           }}
         >
-          RECIPE
+          8 IN 10 PEOPLE SAY THEY'RE BORED OF THEIR OWN COOKING. THE OTHER 2 ARE ON BITECLUB.
         </div>
 
         {/* Recipe name — massive editorial headline */}
@@ -295,7 +296,7 @@ export function styleDIngredients({ dish, platform }: SlideProps): React.ReactEl
             letterSpacing: '0.12em',
           }}
         >
-          BITECLUB
+          Professionals shop from a list. Amateurs shop from memory. You're a professional now.
         </div>
       )}
 
@@ -432,7 +433,7 @@ export function styleDSteps({ dish, platform }: SlideProps): React.ReactElement 
             letterSpacing: '0.12em',
           }}
         >
-          BITECLUB
+          A recipe you actually finish is worth 12 you saved and forgot. BiteClub is where you finish them.
         </div>
       )}
 

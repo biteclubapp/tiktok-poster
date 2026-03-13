@@ -46,10 +46,17 @@ export interface PostHogStat {
   unit?: string;
 }
 
+export interface PostHogGeo {
+  topCountries: { country: string; count: number }[];
+  topCities: { city: string; count: number }[];
+  uniqueCountries: number;
+}
+
 export interface PostHogStatsResponse {
   stats: PostHogStat[];
   title: string;
   callout: string;
+  geo?: PostHogGeo;
 }
 
 // ── Core query function ──────────────────────────────────────────────────────
@@ -167,6 +174,44 @@ export async function getMostPopularScreen(days: number = 30): Promise<string> {
   return result.results[0]?.[0] ? String(result.results[0][0]) : 'N/A';
 }
 
+// ── Geography queries ────────────────────────────────────────────────────────
+
+/**
+ * Get top countries by unique users in the given time period.
+ */
+export async function getTopCountries(days: number = 30, limit: number = 5): Promise<{ country: string; count: number }[]> {
+  const result = await hogqlQuery(
+    `SELECT properties.$geoip_country_name as country, count(distinct distinct_id) as cnt FROM events WHERE timestamp >= now() - interval ${days} day AND properties.$geoip_country_name != '' GROUP BY country ORDER BY cnt DESC LIMIT ${limit}`
+  );
+  return result.results.map((row) => ({
+    country: String(row[0]),
+    count: Number(row[1]),
+  }));
+}
+
+/**
+ * Get top cities by unique users.
+ */
+export async function getTopCities(days: number = 30, limit: number = 5): Promise<{ city: string; count: number }[]> {
+  const result = await hogqlQuery(
+    `SELECT properties.$geoip_city_name as city, count(distinct distinct_id) as cnt FROM events WHERE timestamp >= now() - interval ${days} day AND properties.$geoip_city_name != '' GROUP BY city ORDER BY cnt DESC LIMIT ${limit}`
+  );
+  return result.results.map((row) => ({
+    city: String(row[0]),
+    count: Number(row[1]),
+  }));
+}
+
+/**
+ * Get count of unique countries with active users.
+ */
+export async function getUniqueCountryCount(days: number = 30): Promise<number> {
+  const result = await hogqlQuery(
+    `SELECT count(distinct properties.$geoip_country_name) FROM events WHERE timestamp >= now() - interval ${days} day AND properties.$geoip_country_name != ''`
+  );
+  return Number(result.results[0]?.[0] ?? 0);
+}
+
 // ── Aggregate stats for carousel ─────────────────────────────────────────────
 
 /**
@@ -183,6 +228,9 @@ export async function getCommunityStats(): Promise<PostHogStatsResponse> {
     totalSignups,
     activeUsers30d,
     recipesSaved,
+    topCountries,
+    topCities,
+    uniqueCountries,
   ] = await Promise.all([
     getEventCount('meal_post_success', 9999),
     getEventCount('recipe_created', 9999),
@@ -192,6 +240,9 @@ export async function getCommunityStats(): Promise<PostHogStatsResponse> {
     getTotalSignups(),
     getUniqueUserCount(30),
     getEventCount('recipe_save_success', 9999),
+    getTopCountries(30, 5),
+    getTopCities(30, 5),
+    getUniqueCountryCount(30),
   ]);
 
   function fmt(n: number): string {
@@ -199,6 +250,8 @@ export async function getCommunityStats(): Promise<PostHogStatsResponse> {
     if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
     return n.toLocaleString('en-US');
   }
+
+  const topCity = topCities[0];
 
   return {
     title: 'This Week on BiteClub',
@@ -212,6 +265,13 @@ export async function getCommunityStats(): Promise<PostHogStatsResponse> {
       { label: 'Comments', value: fmt(totalComments) },
       { label: 'Recipes saved', value: fmt(recipesSaved) },
       { label: 'Total signups', value: fmt(totalSignups) },
+      { label: 'Countries with cooks', value: String(uniqueCountries) },
+      ...(topCity ? [{ label: 'Top city', value: topCity.city, unit: `${topCity.count} cooks` }] : []),
     ],
+    geo: {
+      topCountries,
+      topCities,
+      uniqueCountries,
+    },
   };
 }

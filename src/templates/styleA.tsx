@@ -4,7 +4,7 @@ import { WIDTH, HEIGHT, SlideProps, getIngredientEmoji, getStepSizing, getIngred
 // Style A: "Clean & Modern"
 // Light gray bg (#FAFAF8), red accent bar top, DM Serif Display titles
 
-export function styleAHero({ dish, heroImageBase64 }: SlideProps): React.ReactElement {
+export function styleAHero({ dish, heroImageBase64, platform }: SlideProps): React.ReactElement {
   return (
     <div
       style={{
@@ -65,7 +65,7 @@ export function styleAHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
           bottom: 0,
           left: 0,
           right: 0,
-          padding: '144px 72px 72px',
+          padding: '108px 72px 60px',
           background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
           display: 'flex',
           flexDirection: 'column',
@@ -73,7 +73,7 @@ export function styleAHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
       >
         <div
           style={{
-            fontSize: 84,
+            fontSize: 72,
             fontWeight: 700,
             color: '#fff',
             fontFamily: 'DM Serif Display',
@@ -88,21 +88,26 @@ export function styleAHero({ dish, heroImageBase64 }: SlideProps): React.ReactEl
             display: 'flex',
             alignItems: 'center',
             gap: 18,
-            marginTop: 24,
+            marginTop: 20,
           }}
         >
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 39, fontWeight: 500 }}>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 33, fontWeight: 500 }}>
             {dish.cookTime}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 39 }}>{'·'}</div>
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 39, fontWeight: 500 }}>
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 33 }}>{'·'}</div>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 33, fontWeight: 500 }}>
             {`${dish.stepCount} steps`}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 39 }}>{'·'}</div>
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 39, fontWeight: 500 }}>
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 33 }}>{'·'}</div>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 33, fontWeight: 500 }}>
             {`${dish.ingredientCount} ingredients`}
           </div>
         </div>
+        {platform !== 'reddit' && (
+          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 28, fontWeight: 500, marginTop: 16, letterSpacing: '0.03em' }}>
+            Most home cooks make the same 7 dishes on repeat. BiteClub is how you finally add an 8th.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -217,7 +222,7 @@ export function styleAIngredients({ dish, platform }: SlideProps): React.ReactEl
             BC
           </div>
           <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
-            BiteClub
+            Knowing what's in a dish makes you 3x more likely to actually cook it. That's the whole idea behind BiteClub.
           </div>
         </div>
       )}
@@ -347,7 +352,7 @@ export function styleASteps({ dish, platform }: SlideProps): React.ReactElement 
             BC
           </div>
           <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
-            BiteClub
+            Following a recipe step-by-step cuts kitchen mistakes by half. BiteClub keeps the steps where you need them.
           </div>
         </div>
       )}

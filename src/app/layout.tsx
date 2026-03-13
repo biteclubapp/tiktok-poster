@@ -3,8 +3,8 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
-  title: "BiteClub TikTok Poster",
-  description: "Generate and post branded TikTok carousels from BiteClub dishes",
+  title: "BiteClub Poster",
+  description: "Generate and post branded carousels from BiteClub dishes to TikTok, Reddit, and Instagram",
 };
 
 export default function RootLayout({

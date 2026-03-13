@@ -9,12 +9,18 @@ import { WIDTH, HEIGHT, renderCTASlide, imageToBase64, Platform } from './shared
 import { styleAHero, styleAIngredients, styleASteps } from './styleA';
 import { styleBHero, styleBIngredients, styleBSteps } from './styleB';
 import { styleCHero, styleCIngredients, styleCSteps } from './styleC';
+import { styleDHero, styleDIngredients, styleDSteps } from './styleD';
+import { styleEHero, styleEIngredients, styleESteps } from './styleE';
+import { styleFHero, styleFIngredients, styleFSteps } from './styleF';
 import React from 'react';
 
 const templateMap = {
   A: { hero: styleAHero, ingredients: styleAIngredients, steps: styleASteps },
   B: { hero: styleBHero, ingredients: styleBIngredients, steps: styleBSteps },
   C: { hero: styleCHero, ingredients: styleCIngredients, steps: styleCSteps },
+  D: { hero: styleDHero, ingredients: styleDIngredients, steps: styleDSteps },
+  E: { hero: styleEHero, ingredients: styleEIngredients, steps: styleESteps },
+  F: { hero: styleFHero, ingredients: styleFIngredients, steps: styleFSteps },
 };
 
 // Cache fetched emoji SVGs in memory
@@ -79,7 +85,7 @@ async function renderJsxToJpeg(
   const pngData = resvg.render();
   const pngBuffer = pngData.asPng();
 
-  // sharp: upscale to full 1080x1920 + convert to JPEG
+  // sharp: upscale to full 1080x1440 + convert to JPEG
   const jpegBuffer = await sharp(pngBuffer)
     .resize(WIDTH, HEIGHT, { kernel: 'lanczos3' })
     .jpeg({ quality: 88 })

@@ -7,7 +7,24 @@ interface CarouselPreviewProps {
   loading: boolean;
 }
 
-const slideLabels = ['Hero Photo', 'Ingredients', 'Instructions', 'CTA'];
+// Infer slide label from its position in the carousel
+// The render pipeline always produces: hero, [ingredients], [instructions], [cta (non-reddit)]
+// Since we don't know exactly which slides are present, we label them positionally:
+// slide 0 = Hero, last slide if count >=4 = CTA, middle slides = Ingredients / Instructions
+function getSlideLabel(index: number, total: number): string {
+  if (index === 0) return 'Hero';
+  if (total >= 4 && index === total - 1) return 'CTA';
+  if (total === 3) {
+    if (index === 1) return 'Ingredients';
+    if (index === 2) return 'Instructions';
+  }
+  if (total === 4) {
+    if (index === 1) return 'Ingredients';
+    if (index === 2) return 'Instructions';
+  }
+  // 2-slide or unusual: just number them
+  return `Slide ${index + 1}`;
+}
 
 export default function CarouselPreview({ slides, loading }: CarouselPreviewProps) {
   const [zoomedSlide, setZoomedSlide] = useState<number | null>(null);
@@ -42,11 +59,11 @@ export default function CarouselPreview({ slides, loading }: CarouselPreviewProp
           <button
             key={i}
             onClick={() => setZoomedSlide(i)}
-            className="group relative rounded-xl overflow-hidden border border-gray-200 hover:border-red-500 transition-colors aspect-[9/16]"
+            className="group relative rounded-xl overflow-hidden border border-gray-200 hover:border-red-500 transition-colors aspect-[3/4]"
           >
             <img
               src={url}
-              alt={`Slide ${i + 1}: ${slideLabels[i]}`}
+              alt={`Slide ${i + 1}: ${getSlideLabel(i, slides.length)}`}
               className="w-full h-full object-cover"
               onError={(e) => {
                 console.error(`Failed to load slide ${i}:`, url);
@@ -54,7 +71,7 @@ export default function CarouselPreview({ slides, loading }: CarouselPreviewProp
               }}
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-              <span className="text-white text-xs font-medium">{slideLabels[i]}</span>
+              <span className="text-white text-xs font-medium">{getSlideLabel(i, slides.length)}</span>
             </div>
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
               <span className="opacity-0 group-hover:opacity-100 text-white text-lg transition-opacity">
@@ -94,7 +111,7 @@ export default function CarouselPreview({ slides, loading }: CarouselPreviewProp
                 ←
               </button>
               <p className="text-white/70 text-sm">
-                {slideLabels[zoomedSlide]} ({zoomedSlide + 1}/{slides.length})
+                {getSlideLabel(zoomedSlide, slides.length)} ({zoomedSlide + 1}/{slides.length})
               </p>
               <button
                 onClick={() => setZoomedSlide(Math.min(slides.length - 1, zoomedSlide + 1))}

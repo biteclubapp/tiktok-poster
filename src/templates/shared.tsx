@@ -2,8 +2,8 @@ import { DishData } from '@/types';
 import React from 'react';
 
 // Dynamic sizing for steps — fills the full page height
-// Available content area: ~1920 - 72*2 (padding) - 120 (header+label) - 100 (branding) ≈ 1556px
-const STEP_CONTENT_HEIGHT = 1556;
+// Available content area: ~1440 - 72*2 (padding) - 120 (header+label) - 100 (branding) ≈ 1076px
+const STEP_CONTENT_HEIGHT = 1076;
 
 export function getStepSizing(count: number) {
   // Calculate how much space each step gets
@@ -31,7 +31,7 @@ export function getStepSizing(count: number) {
 }
 
 // Available content area for ingredients (single-column list)
-const ING_CONTENT_HEIGHT = 1556;
+const ING_CONTENT_HEIGHT = 1076;
 
 export function getIngredientSizing(count: number) {
   const spacePerItem = ING_CONTENT_HEIGHT / Math.max(count, 1);
@@ -104,9 +104,9 @@ export function getIngredientEmoji(ingredient: string): string {
   return '🍽';
 }
 
-// TikTok carousel dimensions
+// TikTok carousel dimensions (3:4 aspect ratio)
 export const WIDTH = 1080;
-export const HEIGHT = 1920;
+export const HEIGHT = 1440;
 
 export type Platform = 'tiktok' | 'reddit' | 'instagram';
 
@@ -117,7 +117,12 @@ export interface SlideProps {
 }
 
 // CTA Slide — same for all templates
-export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): React.ReactElement {
+export function renderCTASlide(style: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', logoBase64?: string): React.ReactElement {
+  // Styles D, E, F have their own fully custom CTA slides
+  if (style === 'D') return renderCTASlideD(logoBase64);
+  if (style === 'E') return renderCTASlideE(logoBase64);
+  if (style === 'F') return renderCTASlideF(logoBase64);
+
   const isB = style === 'B';
   const bgColor = isB ? '#111' : style === 'C' ? '#FFF8F0' : '#FAFAF8';
   const textColor = isB ? '#fff' : style === 'C' ? '#2a2018' : '#1a1a1a';
@@ -179,22 +184,22 @@ export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): Rea
       )}
 
       {/* BiteClub logo */}
-      <div style={{ width: 160, height: 160, marginBottom: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 120, height: 120, marginBottom: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {logoBase64 ? (
-          <img src={logoBase64} width={160} height={160} style={{ width: 160, height: 160, objectFit: 'contain' }} />
+          <img src={logoBase64} width={120} height={120} style={{ width: 120, height: 120, objectFit: 'contain' }} />
         ) : (
           <div
             style={{
-              width: 160,
-              height: 160,
-              borderRadius: 80,
+              width: 120,
+              height: 120,
+              borderRadius: 60,
               background: '#E63946',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <div style={{ color: '#fff', fontSize: 48, fontWeight: 700 }}>BC</div>
+            <div style={{ color: '#fff', fontSize: 36, fontWeight: 700 }}>BC</div>
           </div>
         )}
       </div>
@@ -202,12 +207,12 @@ export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): Rea
       {/* Brand name */}
       <div
         style={{
-          fontSize: 72,
+          fontSize: 60,
           fontWeight: 700,
           color: textColor,
           fontFamily: style === 'B' ? 'Cormorant Garamond' : 'DM Serif Display',
           letterSpacing: style === 'B' ? '0.05em' : '-0.02em',
-          marginBottom: 30,
+          marginBottom: 24,
         }}
       >
         BiteClub
@@ -216,16 +221,20 @@ export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): Rea
       {/* Tagline */}
       <div
         style={{
-          fontSize: 42,
+          fontSize: 34,
           fontWeight: 400,
           color: mutedColor,
           textAlign: 'center',
           maxWidth: 800,
           lineHeight: 1.4,
-          marginBottom: 80,
+          marginBottom: 60,
         }}
       >
-        The Strava for cooking — follow friends & discover yourself through what you cook.
+        {style === 'B'
+          ? 'Save recipes, see what friends are cooking, and actually make the stuff you find.'
+          : style === 'C'
+          ? 'Recipes your friends are actually making — not just saving and forgetting.'
+          : 'Find your next favourite recipe. See what the people you trust are cooking.'}
       </div>
 
       {/* App store badges */}
@@ -240,26 +249,442 @@ export function renderCTASlide(style: 'A' | 'B' | 'C', logoBase64?: string): Rea
           style={{
             background: badgeBg,
             color: badgeColor,
-            borderRadius: 24,
-            padding: '24px 48px',
-            fontSize: 30,
+            borderRadius: 20,
+            padding: '20px 40px',
+            fontSize: 26,
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
           }}
         >
-          App Store
+          {style === 'B' ? 'Try BiteClub Free' : style === 'C' ? 'Find Recipes on BiteClub' : 'Start Cooking on BiteClub'}
         </div>
       </div>
 
       {/* Social handles */}
       <div
         style={{
-          marginTop: 60,
-          fontSize: 33,
+          marginTop: 48,
+          fontSize: 28,
           fontWeight: 600,
           color: '#E63946',
           letterSpacing: '0.05em',
+        }}
+      >
+        @biteclub.app
+      </div>
+    </div>
+  );
+}
+
+// Style D CTA — bold editorial, black bg, giant typographic treatment
+function renderCTASlideD(logoBase64?: string): React.ReactElement {
+  return (
+    <div
+      style={{
+        width: WIDTH,
+        height: HEIGHT,
+        borderRadius: 48,
+        overflow: 'hidden',
+        background: '#0A0A0A',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'DM Sans',
+        position: 'relative',
+      }}
+    >
+      {/* Top white band — editorial masthead */}
+      <div
+        style={{
+          background: '#fff',
+          height: 136,
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: 72,
+          paddingRight: 72,
+          justifyContent: 'space-between',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 48,
+            fontWeight: 900,
+            color: '#0A0A0A',
+            letterSpacing: '-0.04em',
+            fontFamily: 'DM Serif Display',
+          }}
+        >
+          BITECLUB
+        </div>
+        <div
+          style={{
+            fontSize: 24,
+            fontWeight: 500,
+            color: '#999',
+            letterSpacing: '0.12em',
+          }}
+        >
+          EST. 2024
+        </div>
+      </div>
+
+      {/* Red horizontal rule */}
+      <div style={{ height: 9, background: '#E63946' }} />
+
+      {/* Main content — centered */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingLeft: 72,
+          paddingRight: 72,
+        }}
+      >
+        {/* Logo */}
+        <div style={{ width: 108, height: 108, marginBottom: 54, display: 'flex' }}>
+          {logoBase64 ? (
+            <img src={logoBase64} width={108} height={108} style={{ width: 108, height: 108, objectFit: 'contain' }} />
+          ) : (
+            <div
+              style={{
+                width: 108,
+                height: 108,
+                borderRadius: 54,
+                background: '#E63946',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <div style={{ color: '#fff', fontSize: 32, fontWeight: 900 }}>BC</div>
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            fontSize: 40,
+            fontWeight: 700,
+            color: '#fff',
+            textAlign: 'center',
+            lineHeight: 1.3,
+            maxWidth: 860,
+            marginBottom: 48,
+          }}
+        >
+          Your recipes deserve better than a camera roll.
+        </div>
+
+        <div
+          style={{
+            fontSize: 30,
+            fontWeight: 400,
+            color: '#666',
+            textAlign: 'center',
+            lineHeight: 1.5,
+            maxWidth: 820,
+            marginBottom: 72,
+          }}
+        >
+          BiteClub is where you save what you cook, follow friends who eat well, and actually find things worth making.
+        </div>
+
+        {/* CTA button */}
+        <div
+          style={{
+            background: '#E63946',
+            color: '#fff',
+            fontSize: 30,
+            fontWeight: 700,
+            padding: '24px 60px',
+            borderRadius: 12,
+            letterSpacing: '0.06em',
+            display: 'flex',
+          }}
+        >
+          GET BITECLUB — FREE
+        </div>
+
+        <div
+          style={{
+            marginTop: 42,
+            fontSize: 28,
+            fontWeight: 600,
+            color: '#444',
+            letterSpacing: '0.08em',
+          }}
+        >
+          @biteclub.app
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Style E CTA — ultra minimal, off-white, airy
+function renderCTASlideE(logoBase64?: string): React.ReactElement {
+  return (
+    <div
+      style={{
+        width: WIDTH,
+        height: HEIGHT,
+        borderRadius: 48,
+        overflow: 'hidden',
+        background: '#F7F7F5',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'DM Sans',
+        position: 'relative',
+      }}
+    >
+      {/* Thin top line */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 80,
+          right: 80,
+          height: 2,
+          background: '#1a1a1a',
+        }}
+      />
+
+      {/* Logo */}
+      <div style={{ width: 96, height: 96, marginBottom: 60, display: 'flex' }}>
+        {logoBase64 ? (
+          <img src={logoBase64} width={96} height={96} style={{ width: 96, height: 96, objectFit: 'contain' }} />
+        ) : (
+          <div
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              border: '3px solid #1a1a1a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div style={{ color: '#1a1a1a', fontSize: 28, fontWeight: 300, letterSpacing: '0.05em' }}>BC</div>
+          </div>
+        )}
+      </div>
+
+      {/* Brand */}
+      <div
+        style={{
+          fontSize: 56,
+          fontWeight: 200,
+          color: '#1a1a1a',
+          letterSpacing: '0.15em',
+          marginBottom: 28,
+        }}
+      >
+        BITECLUB
+      </div>
+
+      {/* Thin divider */}
+      <div style={{ width: 60, height: 2, background: '#E63946', marginBottom: 48 }} />
+
+      {/* Tagline */}
+      <div
+        style={{
+          fontSize: 32,
+          fontWeight: 300,
+          color: '#555',
+          textAlign: 'center',
+          maxWidth: 780,
+          lineHeight: 1.6,
+          letterSpacing: '0.02em',
+          marginBottom: 90,
+        }}
+      >
+        Where the food you make becomes part of who you are. Save recipes. Follow friends. Cook more.
+      </div>
+
+      {/* Minimal CTA */}
+      <div
+        style={{
+          border: '2px solid #1a1a1a',
+          color: '#1a1a1a',
+          fontSize: 26,
+          fontWeight: 500,
+          padding: '20px 50px',
+          borderRadius: 6,
+          letterSpacing: '0.1em',
+          display: 'flex',
+        }}
+      >
+        DOWNLOAD BITECLUB
+      </div>
+
+      <div
+        style={{
+          marginTop: 48,
+          fontSize: 26,
+          fontWeight: 400,
+          color: '#E63946',
+          letterSpacing: '0.08em',
+        }}
+      >
+        @biteclub.app
+      </div>
+
+      {/* Thin bottom line */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 80,
+          right: 80,
+          height: 2,
+          background: '#1a1a1a',
+        }}
+      />
+    </div>
+  );
+}
+
+// Style F CTA — playful, coral/yellow palette
+function renderCTASlideF(logoBase64?: string): React.ReactElement {
+  return (
+    <div
+      style={{
+        width: WIDTH,
+        height: HEIGHT,
+        borderRadius: 60,
+        overflow: 'hidden',
+        background: '#FFF3E0',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'DM Sans',
+        position: 'relative',
+      }}
+    >
+      {/* Decorative top blob */}
+      <div
+        style={{
+          position: 'absolute',
+          top: -120,
+          left: -120,
+          width: 600,
+          height: 600,
+          borderRadius: 300,
+          background: '#FFD166',
+          opacity: 0.4,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: -100,
+          right: -100,
+          width: 500,
+          height: 500,
+          borderRadius: 250,
+          background: '#EF476F',
+          opacity: 0.15,
+        }}
+      />
+
+      {/* Logo */}
+      <div style={{ width: 112, height: 112, marginBottom: 48, display: 'flex', position: 'relative' }}>
+        {logoBase64 ? (
+          <img src={logoBase64} width={112} height={112} style={{ width: 112, height: 112, objectFit: 'contain' }} />
+        ) : (
+          <div
+            style={{
+              width: 112,
+              height: 112,
+              borderRadius: 56,
+              background: '#EF476F',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div style={{ color: '#fff', fontSize: 36, fontWeight: 800 }}>BC</div>
+          </div>
+        )}
+      </div>
+
+      {/* Brand */}
+      <div
+        style={{
+          fontSize: 64,
+          fontWeight: 800,
+          color: '#1a1a1a',
+          fontFamily: 'DM Serif Display',
+          letterSpacing: '-0.02em',
+          marginBottom: 20,
+          position: 'relative',
+        }}
+      >
+        BiteClub
+      </div>
+
+      {/* Fun tagline */}
+      <div
+        style={{
+          background: '#EF476F',
+          color: '#fff',
+          fontSize: 26,
+          fontWeight: 700,
+          padding: '10px 30px',
+          borderRadius: 999,
+          letterSpacing: '0.04em',
+          marginBottom: 54,
+          position: 'relative',
+        }}
+      >
+        recipes worth making. friends who actually cook.
+      </div>
+
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 400,
+          color: '#555',
+          textAlign: 'center',
+          maxWidth: 800,
+          lineHeight: 1.5,
+          marginBottom: 72,
+          position: 'relative',
+        }}
+      >
+        Stop saving recipes you'll never make. BiteClub shows you what your friends are actually cooking — and makes it stupidly easy to do the same.
+      </div>
+
+      {/* Pill CTA */}
+      <div
+        style={{
+          background: '#1a1a1a',
+          color: '#fff',
+          fontSize: 30,
+          fontWeight: 700,
+          padding: '24px 64px',
+          borderRadius: 999,
+          display: 'flex',
+          position: 'relative',
+        }}
+      >
+        Try BiteClub for Free
+      </div>
+
+      <div
+        style={{
+          marginTop: 42,
+          fontSize: 28,
+          fontWeight: 600,
+          color: '#EF476F',
+          position: 'relative',
         }}
       >
         @biteclub.app

@@ -84,7 +84,7 @@ export function styleFHero({ dish, heroImageBase64, platform }: SlideProps): Rea
               letterSpacing: '0.06em',
             }}
           >
-            BITECLUB
+            Your fridge deserves better than Tuesday pasta again. BiteClub has opinions.
           </div>
         )}
       </div>
@@ -270,7 +270,7 @@ export function styleFIngredients({ dish, platform }: SlideProps): React.ReactEl
               letterSpacing: '0.14em',
             }}
           >
-            BITECLUB
+            Fun fact: nobody in history has regretted buying fresh herbs. BiteClub will talk you into it every time.
           </div>
         </div>
       )}
@@ -425,7 +425,7 @@ export function styleFSteps({ dish, platform }: SlideProps): React.ReactElement 
               letterSpacing: '0.14em',
             }}
           >
-            BITECLUB
+            Cooking is basically a group activity you do alone. Unless you're on BiteClub — hi, friends.
           </div>
         </div>
       )}

@@ -59,6 +59,10 @@ export default function Home() {
     setSelectedMeal(meal);
     const recipe = meal.recipes[0];
     setEditedTitle(recipe?.title || meal.caption || 'Untitled Recipe');
+    // Clear old slides so the preview doesn't show stale content from a previous dish
+    setSlides([]);
+    // Reset hero image — DishBrowser will auto-set it via onSelectHeroImage callback
+    setHeroImageUrl('');
   }
 
   async function generateCarousel() {
@@ -160,31 +164,16 @@ export default function Home() {
   }
 
   async function publishToInstagram(caption: string) {
-    if (!selectedMeal || slides.length === 0) return;
+    if (slides.length === 0) return;
 
     setPublishingInstagram(true);
     try {
-      // Generate Instagram carousel (with branding, same as TikTok)
-      const dishData = { ...mealToDishData(selectedMeal, heroImageUrl), recipeName: editedTitle };
-      const genRes = await fetch('/api/carousel/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dishData, template, platform: 'instagram' }),
-      });
-
-      if (!genRes.ok) {
-        const err = await genRes.json();
-        throw new Error(err.error || 'Instagram carousel generation failed');
-      }
-
-      const genData = await genRes.json();
-
-      // Publish to Instagram
+      // Instagram uses the already-generated slides (same as TikTok — with branding, CTA slide)
       const res = await fetch('/api/instagram/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slides: genData.slides,
+          slides,
           caption,
         }),
       });
@@ -324,7 +313,7 @@ export default function Home() {
             </div>
 
             {/* Post Controls */}
-            {slides.length > 0 && (
+            {selectedMeal && (
               <div className="bg-white rounded-2xl border border-gray-200 p-4">
                 <PostControls
                   slides={slides}
