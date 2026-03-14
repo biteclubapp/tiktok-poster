@@ -1,13 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
-import { getSupabaseServiceRoleKey, getSupabaseUrl } from '@/lib/supabase-config';
+import {
+  getSupabaseServiceRoleKey,
+  getSupabaseUrl,
+  getDataSupabaseUrl,
+  getDataSupabaseServiceRoleKey
+} from '@/lib/supabase-config';
 
-const supabaseUrl = getSupabaseUrl();
-const supabaseServiceKey = getSupabaseServiceRoleKey();
+// 1. Auth & Login Supabase Client
+const authSupabaseUrl = getSupabaseUrl();
+const authSupabaseKey = getSupabaseServiceRoleKey();
+export const authSupabase = createClient(authSupabaseUrl, authSupabaseKey);
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// 2. Main App Data Supabase Client (Meals, Recipes, Profiles)
+const dataSupabaseUrl = getDataSupabaseUrl();
+const dataSupabaseKey = getDataSupabaseServiceRoleKey();
+export const dataSupabase = createClient(dataSupabaseUrl, dataSupabaseKey);
 
 export async function fetchDishes(limit = 200, search?: string) {
-  const query = supabase
+  const query = dataSupabase
     .from('meals')
     .select(`
       id,

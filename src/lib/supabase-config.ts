@@ -30,6 +30,17 @@ export function getSupabaseServiceRoleKey(): string {
   return readEnv(['SUPABASE_SERVICE_ROLE_KEY']);
 }
 
+export function getDataSupabaseUrl(): string {
+  return readEnv([
+    'DATA_SUPABASE_URL',
+    'NEXT_PUBLIC_DATA_SUPABASE_URL'
+  ]);
+}
+
+export function getDataSupabaseServiceRoleKey(): string {
+  return readEnv(['DATA_SUPABASE_SERVICE_ROLE_KEY']);
+}
+
 export function isSupabaseAuthConfigured(): boolean {
   return Boolean(
     getSupabaseUrl()
