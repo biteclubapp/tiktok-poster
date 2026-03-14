@@ -1,5 +1,24 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Supabase Auth
+
+The app now uses Supabase Auth to gate the UI and API routes behind an invitation-only login screen.
+
+Set these variables in `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://axmgokdzqstnkiofcdbd.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+SUPABASE_URL=https://axmgokdzqstnkiofcdbd.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+For invitation-only access in Supabase:
+
+1. Disable public email sign-ups in your Supabase Auth settings.
+2. Invite users from the Supabase dashboard.
+3. Have invited users log in on `/login` with the credentials attached to their invite.
+
 ## Getting Started
 
 First, run the development server:

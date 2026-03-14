@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServiceRoleKey, getSupabaseUrl } from '@/lib/supabase-config';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = getSupabaseUrl();
+const supabaseServiceKey = getSupabaseServiceRoleKey();
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function fetchDishes(limit = 200, search?: string) {
-  let query = supabase
+  const query = supabase
     .from('meals')
     .select(`
       id,
@@ -55,7 +56,6 @@ export async function fetchDishes(limit = 200, search?: string) {
   }
 
   // Transform the raw data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const meals = (data || [])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .filter((meal: any) => {
