@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getValidTokens, publishCarousel } from '@/lib/tiktok';
-import { uploadImageToCloudflare } from '@/lib/cloudflare-images';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-
-const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
+import { ensureSlidePublicUrl } from '@/lib/carousel-slides';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,12 +24,7 @@ export async function POST(request: NextRequest) {
     // Upload each slide to Cloudflare Images to get public URLs
     const publicUrls: string[] = [];
     for (const slideUrl of slides) {
-      // Extract filename from /api/images/[filename]
-      const filename = slideUrl.split('/').pop();
-      if (!filename) continue;
-
-      const buffer = await readFile(join(TMP_DIR, filename));
-      const publicUrl = await uploadImageToCloudflare(buffer, filename);
+      const publicUrl = await ensureSlidePublicUrl(String(slideUrl));
       publicUrls.push(publicUrl);
     }
 

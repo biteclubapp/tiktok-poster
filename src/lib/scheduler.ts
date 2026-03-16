@@ -1,14 +1,11 @@
 import cron from 'node-cron';
 import { randomUUID } from 'crypto';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { getDuePosts, updatePostStatus, type ScheduledPost } from './db';
 import { generateCarousel } from '@/templates/render';
 import { uploadImageToCloudflare } from './cloudflare-images';
 import { getValidTokens, publishCarousel } from './tiktok';
 import type { DishData, TemplateStyle } from '@/types';
-
-const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
+import { buildDescriptiveSlidePrefix, persistGeneratedSlides } from './carousel-slides';
 
 let schedulerStarted = false;
 
@@ -51,17 +48,14 @@ async function processPost(post: ScheduledPost) {
     const template = post.template as TemplateStyle;
 
     const slideBuffers = await generateCarousel(dishData, template);
-
-    // Save slides to tmp
-    await mkdir(TMP_DIR, { recursive: true });
     const batchId = randomUUID();
-    const slideUrls: string[] = [];
-
-    for (let i = 0; i < slideBuffers.length; i++) {
-      const filename = `${batchId}-slide-${i}.jpg`;
-      await writeFile(join(TMP_DIR, filename), slideBuffers[i]);
-      slideUrls.push(`/api/images/${filename}`);
-    }
+    const filenamePrefix = buildDescriptiveSlidePrefix(
+      'scheduled',
+      dishData.recipeName,
+      `template-${template}`
+    );
+    const persistedSlides = await persistGeneratedSlides(slideBuffers, batchId, filenamePrefix);
+    const slideUrls = persistedSlides.slides.map((slide) => slide.previewUrl);
 
     updatePostStatus(postId, 'publishing', { slide_urls: slideUrls });
 
@@ -77,9 +71,11 @@ async function processPost(post: ScheduledPost) {
     }
 
     const publicUrls: string[] = [];
-    for (const buffer of slideBuffers) {
-      const filename = `scheduled-${postId}-${randomUUID()}.jpg`;
-      const publicUrl = await uploadImageToCloudflare(buffer, filename);
+    for (let i = 0; i < persistedSlides.slides.length; i++) {
+      const slide = persistedSlides.slides[i];
+      const publicUrl =
+        slide.publicUrl ||
+        await uploadImageToCloudflare(slideBuffers[i], slide.filename);
       publicUrls.push(publicUrl);
     }
 

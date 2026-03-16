@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCarousel } from '@/templates/render';
 import { DishData, TemplateStyle } from '@/types';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { buildDescriptiveSlidePrefix, persistGeneratedSlides } from '@/lib/carousel-slides';
 import { randomUUID } from 'crypto';
-
-const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
 
 const SAMPLE_DISH: DishData = {
   meal: {} as DishData['meal'],
@@ -45,18 +42,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const jpegBuffers = await generateCarousel(SAMPLE_DISH, template);
-
-    await mkdir(TMP_DIR, { recursive: true });
     const batchId = randomUUID();
-    const slideUrls: string[] = [];
+    const filenamePrefix = buildDescriptiveSlidePrefix(
+      'preview',
+      SAMPLE_DISH.recipeName,
+      `template-${template}`
+    );
+    const persistedSlides = await persistGeneratedSlides(jpegBuffers, batchId, filenamePrefix);
 
-    for (let i = 0; i < jpegBuffers.length; i++) {
-      const filename = `${batchId}-slide-${i}.jpg`;
-      await writeFile(join(TMP_DIR, filename), jpegBuffers[i]);
-      slideUrls.push(`/api/images/${filename}`);
-    }
-
-    return NextResponse.json({ slides: slideUrls, template, batchId });
+    return NextResponse.json({
+      slides: persistedSlides.slides.map((slide) => slide.previewUrl),
+      template,
+      batchId,
+    });
   } catch (error) {
     console.error('Preview generation error:', error);
     return NextResponse.json(

@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-
-const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
+import { readSlideBuffer } from '@/lib/carousel-slides';
 
 export async function GET(
   _request: NextRequest,
@@ -17,7 +14,7 @@ export async function GET(
   }
 
   try {
-    const buffer = await readFile(join(TMP_DIR, filename));
+    const buffer = await readSlideBuffer(`/api/images/${filename}`);
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'image/jpeg',

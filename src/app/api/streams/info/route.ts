@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateInfoCarousel, InfoCarouselData, InfoTemplateStyle } from '@/templates/info-render';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { buildDescriptiveSlidePrefix, persistGeneratedSlides } from '@/lib/carousel-slides';
 import { randomUUID } from 'crypto';
-
-const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
 
 const VALID_STYLES: InfoTemplateStyle[] = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -40,18 +37,24 @@ export async function POST(request: NextRequest) {
     }
 
     const jpegBuffers = await generateInfoCarousel(data, style);
-
-    await mkdir(TMP_DIR, { recursive: true });
     const batchId = randomUUID();
-    const slideUrls: string[] = [];
+    const primaryLabel =
+      data.type === 'community_spotlight'
+        ? data.username
+        : data.title;
+    const filenamePrefix = buildDescriptiveSlidePrefix(
+      'info',
+      data.type,
+      primaryLabel,
+      `style-${style}`
+    );
+    const persistedSlides = await persistGeneratedSlides(jpegBuffers, batchId, filenamePrefix);
 
-    for (let i = 0; i < jpegBuffers.length; i++) {
-      const filename = `${batchId}-slide-${i}.jpg`;
-      await writeFile(join(TMP_DIR, filename), jpegBuffers[i]);
-      slideUrls.push(`/api/images/${filename}`);
-    }
-
-    return NextResponse.json({ slides: slideUrls, style, batchId });
+    return NextResponse.json({
+      slides: persistedSlides.slides.map((slide) => slide.previewUrl),
+      style,
+      batchId,
+    });
   } catch (error) {
     console.error('Info carousel generation error:', error);
     return NextResponse.json(

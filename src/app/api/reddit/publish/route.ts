@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getValidTokens, publishGallery } from '@/lib/reddit';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-
-const TMP_DIR = join(process.cwd(), 'tmp', 'carousel');
+import { readSlideBuffer } from '@/lib/carousel-slides';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,9 +24,7 @@ export async function POST(request: NextRequest) {
     // Read JPEG buffers from tmp directory
     const imageBuffers: Buffer[] = [];
     for (const slideUrl of slides) {
-      // slideUrl is like /api/images/uuid-slide-0.jpg
-      const filename = slideUrl.split('/').pop()!;
-      const buffer = await readFile(join(TMP_DIR, filename));
+      const buffer = await readSlideBuffer(String(slideUrl));
       imageBuffers.push(buffer);
     }
 
