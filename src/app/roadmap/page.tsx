@@ -108,6 +108,129 @@ const FORMAT_ICONS: Record<ContentFormat, string> = {
 };
 
 const CHALLENGE_STORAGE_KEY = 'biteclub-challenge';
+const CHALLENGE_TASKS_KEY = 'biteclub-challenge-tasks';
+
+type TaskColumn = 'todo' | 'doing' | 'done';
+
+interface ChallengeTask {
+  id: string;
+  title: string;
+  assignee: Challenger | 'both';
+  column: TaskColumn;
+  day?: number; // linked to challenge day
+  priority: 'high' | 'medium' | 'low';
+}
+
+const TASK_COLUMN_META: Record<TaskColumn, { label: string; color: string; emptyText: string }> = {
+  todo: { label: 'To Do', color: 'bg-red-400', emptyText: 'Nothing here yet — add tasks or reset defaults' },
+  doing: { label: 'Doing', color: 'bg-amber-400', emptyText: 'Drag tasks here when you start working on them' },
+  done: { label: 'Done', color: 'bg-green-400', emptyText: 'Completed tasks show up here' },
+};
+
+const ASSIGNEE_COLORS: Record<ChallengeTask['assignee'], { bg: string; text: string; label: string }> = {
+  johannes: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Johannes' },
+  will: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Will' },
+  both: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Both' },
+};
+
+const PRIORITY_DOTS: Record<ChallengeTask['priority'], string> = {
+  high: 'bg-red-500',
+  medium: 'bg-amber-400',
+  low: 'bg-gray-300',
+};
+
+function makeDefaultTasks(): ChallengeTask[] {
+  let id = 0;
+  const t = (title: string, assignee: ChallengeTask['assignee'], priority: ChallengeTask['priority'], day?: number): ChallengeTask => ({
+    id: `default-${id++}`,
+    title,
+    assignee,
+    column: 'todo',
+    day,
+    priority,
+  });
+
+  return [
+    // Pre-launch prep (no day)
+    t('Set up TikTok creator accounts', 'both', 'high'),
+    t('Agree on hashtag strategy (#BiteClub30 #FounderChallenge)', 'both', 'high'),
+    t('Film intro/teaser announcing the challenge', 'both', 'high'),
+    t('Set up ring light + phone mount', 'johannes', 'medium'),
+    t('Set up ring light + phone mount', 'will', 'medium'),
+    t('Create shared Google Drive for raw footage', 'both', 'medium'),
+    t('Draft bio links (BiteClub app store link)', 'both', 'medium'),
+    t('Batch-write captions for Week 1 (Days 1-7)', 'johannes', 'high'),
+    t('Batch-write captions for Week 1 (Days 1-7)', 'will', 'high'),
+
+    // Week 1 tasks
+    t('Film "Why we built BiteClub" — write 3 talking points first', 'johannes', 'high', 1),
+    t('Film "Why we built BiteClub" — write 3 talking points first', 'will', 'high', 1),
+    t('Cook something tonight and film the whole process', 'johannes', 'medium', 2),
+    t('Cook something tonight and film the whole process', 'will', 'medium', 2),
+    t('Screenshot cooking streak from app + design carousel', 'johannes', 'medium', 3),
+    t('Screenshot cooking streak from app + design carousel', 'will', 'medium', 3),
+    t('Set up late-night coding B-roll shots', 'johannes', 'medium', 4),
+    t('Set up late-night coding B-roll shots', 'will', 'medium', 4),
+    t('Clean fridge before filming (or don\'t — chaos content)', 'johannes', 'low', 5),
+    t('Clean fridge before filming (or don\'t — chaos content)', 'will', 'low', 5),
+    t('Pick your weirdest feature to showcase', 'johannes', 'medium', 6),
+    t('Pick your weirdest feature to showcase', 'will', 'medium', 6),
+    t('Compile Week 1 like counts for recap duet', 'both', 'high', 7),
+
+    // Week 2 tasks
+    t('Batch-write captions for Week 2 (Days 8-14)', 'johannes', 'high'),
+    t('Batch-write captions for Week 2 (Days 8-14)', 'will', 'high'),
+    t('Pick a new country cuisine to try from the map', 'johannes', 'medium', 8),
+    t('Pick a new country cuisine to try from the map', 'will', 'medium', 8),
+    t('Find/record the first user reaction footage', 'both', 'medium', 9),
+    t('Screenshot flavor palate + make carousel slides', 'johannes', 'medium', 10),
+    t('Screenshot flavor palate + make carousel slides', 'will', 'medium', 10),
+    t('Plan full day-in-the-life shoot schedule', 'johannes', 'high', 11),
+    t('Plan full day-in-the-life shoot schedule', 'will', 'high', 11),
+    t('Research 5 budget recipes + do grocery run', 'johannes', 'medium', 12),
+    t('Research 5 budget recipes + do grocery run', 'will', 'medium', 12),
+    t('Pick your best bug story and outline the narrative', 'johannes', 'medium', 13),
+    t('Pick your best bug story and outline the narrative', 'will', 'medium', 13),
+    t('Compile Week 2 scoreboard + plan trash talk', 'both', 'high', 14),
+
+    // Week 3 tasks
+    t('Batch-write captions for Week 3 (Days 15-21)', 'johannes', 'high'),
+    t('Batch-write captions for Week 3 (Days 15-21)', 'will', 'high'),
+    t('Invite a friend over for Day 15 cook session', 'johannes', 'high', 15),
+    t('Invite a friend over for Day 15 cook session', 'will', 'high', 15),
+    t('Test the "Type of Cook" quiz and screen-record reaction', 'johannes', 'medium', 16),
+    t('Test the "Type of Cook" quiz and screen-record reaction', 'will', 'medium', 16),
+    t('Scout 3-4 food spots in your city to film', 'johannes', 'medium', 17),
+    t('Scout 3-4 food spots in your city to film', 'will', 'medium', 17),
+    t('Pick a recipe you\'d normally never cook', 'johannes', 'medium', 18),
+    t('Pick a recipe you\'d normally never cook', 'will', 'medium', 18),
+    t('Pull app metrics from PostHog for transparency post', 'both', 'high', 19),
+    t('Call parents and ask for a childhood recipe', 'johannes', 'medium', 20),
+    t('Call parents and ask for a childhood recipe', 'will', 'medium', 20),
+    t('Compile Week 3 scoreboard + read comments', 'both', 'high', 21),
+
+    // Week 4 tasks
+    t('Batch-write captions for Week 4 (Days 22-30)', 'johannes', 'high'),
+    t('Batch-write captions for Week 4 (Days 22-30)', 'will', 'high'),
+    t('Screenshot 22-day streak + reflect on the journey', 'johannes', 'medium', 22),
+    t('Screenshot 22-day streak + reflect on the journey', 'will', 'medium', 22),
+    t('Pick a feature request from comments/DMs to build', 'johannes', 'high', 23),
+    t('Pick a feature request from comments/DMs to build', 'will', 'high', 23),
+    t('Plan full week of meals + buy groceries for meal prep', 'johannes', 'high', 24),
+    t('Plan full week of meals + buy groceries for meal prep', 'will', 'high', 24),
+    t('Agree on which recipe to cook for the battle', 'both', 'high', 25),
+    t('Write reflection notes for "what we\'d do differently"', 'johannes', 'medium', 26),
+    t('Write reflection notes for "what we\'d do differently"', 'will', 'medium', 26),
+    t('Pick 5 community posts to react to on camera', 'johannes', 'medium', 27),
+    t('Pick 5 community posts to react to on camera', 'will', 'medium', 27),
+    t('Pick your best cooking skill to teach in 60 seconds', 'johannes', 'medium', 28),
+    t('Pick your best cooking skill to teach in 60 seconds', 'will', 'medium', 28),
+    t('Write bullet points for your "letter to future BiteClub"', 'johannes', 'high', 29),
+    t('Write bullet points for your "letter to future BiteClub"', 'will', 'high', 29),
+    t('Final like count tally + plan the finale video', 'both', 'high', 30),
+    t('Decide the punishment recipe for the loser', 'both', 'high', 30),
+  ];
+}
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -223,6 +346,15 @@ export default function RoadmapPage() {
   const [likesInput, setLikesInput] = useState('');
   const [challengeFilter, setChallengeFilter] = useState<'all' | ChallengeDay['category']>('all');
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const [challengeView, setChallengeView] = useState<'days' | 'tasks'>('days');
+
+  // Challenge tasks state
+  const [challengeTasks, setChallengeTasks] = useState<ChallengeTask[]>([]);
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [taskFilter, setTaskFilter] = useState<'all' | Challenger | 'both'>('all');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTaskValue, setEditingTaskValue] = useState('');
+  const taskEditRef = useRef<HTMLInputElement>(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -243,6 +375,17 @@ export default function RoadmapPage() {
         setChallengeEntries(JSON.parse(savedChallenge));
       }
     } catch { /* ignore */ }
+    // Load challenge tasks
+    try {
+      const savedTasks = localStorage.getItem(CHALLENGE_TASKS_KEY);
+      if (savedTasks) {
+        setChallengeTasks(JSON.parse(savedTasks));
+      } else {
+        setChallengeTasks(makeDefaultTasks());
+      }
+    } catch {
+      setChallengeTasks(makeDefaultTasks());
+    }
     setLoaded(true);
   }, []);
 
@@ -259,6 +402,72 @@ export default function RoadmapPage() {
       localStorage.setItem(CHALLENGE_STORAGE_KEY, JSON.stringify(challengeEntries));
     }
   }, [challengeEntries, loaded]);
+
+  // Save challenge tasks
+  useEffect(() => {
+    if (loaded) {
+      localStorage.setItem(CHALLENGE_TASKS_KEY, JSON.stringify(challengeTasks));
+    }
+  }, [challengeTasks, loaded]);
+
+  // Focus task edit input
+  useEffect(() => {
+    if (editingTaskId && taskEditRef.current) {
+      taskEditRef.current.focus();
+      taskEditRef.current.select();
+    }
+  }, [editingTaskId]);
+
+  // Task helpers
+  const moveTask = useCallback((taskId: string, toColumn: TaskColumn) => {
+    setChallengeTasks(prev => prev.map(t => t.id === taskId ? { ...t, column: toColumn } : t));
+  }, []);
+
+  const deleteTask = useCallback((taskId: string) => {
+    setChallengeTasks(prev => prev.filter(t => t.id !== taskId));
+  }, []);
+
+  const addTask = useCallback((assignee: ChallengeTask['assignee']) => {
+    const newTask: ChallengeTask = {
+      id: uid(),
+      title: 'New task',
+      assignee,
+      column: 'todo',
+      priority: 'medium',
+    };
+    setChallengeTasks(prev => [newTask, ...prev]);
+    setEditingTaskId(newTask.id);
+    setEditingTaskValue('New task');
+  }, []);
+
+  const commitTaskEdit = useCallback(() => {
+    if (editingTaskId && editingTaskValue.trim()) {
+      setChallengeTasks(prev => prev.map(t => t.id === editingTaskId ? { ...t, title: editingTaskValue.trim() } : t));
+    }
+    setEditingTaskId(null);
+  }, [editingTaskId, editingTaskValue]);
+
+  const cycleTaskPriority = useCallback((taskId: string) => {
+    setChallengeTasks(prev => prev.map(t => {
+      if (t.id !== taskId) return t;
+      const next = t.priority === 'high' ? 'medium' : t.priority === 'medium' ? 'low' : 'high';
+      return { ...t, priority: next };
+    }));
+  }, []);
+
+  const cycleTaskAssignee = useCallback((taskId: string) => {
+    setChallengeTasks(prev => prev.map(t => {
+      if (t.id !== taskId) return t;
+      const next = t.assignee === 'johannes' ? 'will' : t.assignee === 'will' ? 'both' : 'johannes';
+      return { ...t, assignee: next };
+    }));
+  }, []);
+
+  const resetTasks = useCallback(() => {
+    setChallengeTasks(makeDefaultTasks());
+  }, []);
+
+  const filteredTasks = challengeTasks.filter(t => taskFilter === 'all' || t.assignee === taskFilter || t.assignee === 'both');
 
   // Challenge helpers
   const getEntry = useCallback((day: number, challenger: Challenger): ChallengeEntry | undefined => {
@@ -724,6 +933,233 @@ export default function RoadmapPage() {
         {/* ─── 30-Day Challenge Tab ───────────────────────────────────────── */}
         {activeTab === 'challenge' && (
           <section>
+            {/* Challenge sub-tabs */}
+            <div className="flex items-center gap-2 mb-6">
+              <button
+                onClick={() => setChallengeView('days')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+                  challengeView === 'days' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                Daily Challenge
+              </button>
+              <button
+                onClick={() => setChallengeView('tasks')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+                  challengeView === 'tasks' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                Task Board
+              </button>
+            </div>
+
+            {/* ─── Tasks Board ──────────────────────────────────────────── */}
+            {challengeView === 'tasks' && (
+              <div>
+                {/* Task filters + actions */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    {(['all', 'johannes', 'will', 'both'] as const).map(filter => (
+                      <button
+                        key={filter}
+                        onClick={() => setTaskFilter(filter)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                          taskFilter === filter
+                            ? filter === 'all' ? 'bg-gray-900 text-white'
+                              : filter === 'johannes' ? 'bg-blue-600 text-white'
+                              : filter === 'will' ? 'bg-orange-500 text-white'
+                              : 'bg-purple-600 text-white'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                      >
+                        {filter === 'all' ? 'All' : filter === 'johannes' ? 'Johannes' : filter === 'will' ? 'Will' : 'Both'}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => addTask('johannes')}
+                      className="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      + Johannes Task
+                    </button>
+                    <button
+                      onClick={() => addTask('will')}
+                      className="text-xs font-bold text-orange-600 hover:bg-orange-50 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      + Will Task
+                    </button>
+                    <button
+                      onClick={() => addTask('both')}
+                      className="text-xs font-bold text-purple-600 hover:bg-purple-50 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      + Shared Task
+                    </button>
+                    <button
+                      onClick={resetTasks}
+                      className="text-xs font-medium text-gray-400 hover:text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      Reset All
+                    </button>
+                  </div>
+                </div>
+
+                {/* Task progress bar */}
+                <div className="mb-6 p-4 bg-white rounded-xl border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-gray-500">Progress</p>
+                    <p className="text-xs text-gray-400">
+                      {filteredTasks.filter(t => t.column === 'done').length} of {filteredTasks.length} tasks done
+                    </p>
+                  </div>
+                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden flex">
+                    {filteredTasks.length > 0 && (
+                      <>
+                        <div
+                          className="bg-green-400 transition-all duration-500"
+                          style={{ width: `${(filteredTasks.filter(t => t.column === 'done').length / filteredTasks.length) * 100}%` }}
+                        />
+                        <div
+                          className="bg-amber-300 transition-all duration-500"
+                          style={{ width: `${(filteredTasks.filter(t => t.column === 'doing').length / filteredTasks.length) * 100}%` }}
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3-column kanban */}
+                <div className="grid grid-cols-3 gap-4">
+                  {(['todo', 'doing', 'done'] as TaskColumn[]).map(column => {
+                    const meta = TASK_COLUMN_META[column];
+                    const columnTasks = filteredTasks.filter(t => t.column === column);
+
+                    return (
+                      <div
+                        key={column}
+                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const taskId = e.dataTransfer.getData('text/plain');
+                          if (taskId) moveTask(taskId, column);
+                        }}
+                        className="bg-gray-100/60 rounded-2xl border border-gray-200/60 min-h-[500px] flex flex-col"
+                      >
+                        {/* Column header */}
+                        <div className="px-4 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2.5 h-2.5 rounded-full ${meta.color}`} />
+                            <h3 className="text-sm font-bold text-gray-900">{meta.label}</h3>
+                            <span className="text-xs text-gray-400 bg-gray-200/80 rounded-full px-2 py-0.5">
+                              {columnTasks.length}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Task cards */}
+                        <div className="px-3 pb-3 flex-1 flex flex-col gap-2">
+                          {columnTasks.length === 0 ? (
+                            <div className="flex-1 flex items-center justify-center">
+                              <p className="text-xs text-gray-400 text-center px-4">{meta.emptyText}</p>
+                            </div>
+                          ) : (
+                            columnTasks.map(task => {
+                              const isEditingThis = editingTaskId === task.id;
+                              const isDragging = draggedTaskId === task.id;
+                              const assigneeInfo = ASSIGNEE_COLORS[task.assignee];
+
+                              return (
+                                <div
+                                  key={task.id}
+                                  draggable={!isEditingThis}
+                                  onDragStart={(e) => {
+                                    setDraggedTaskId(task.id);
+                                    e.dataTransfer.effectAllowed = 'move';
+                                    e.dataTransfer.setData('text/plain', task.id);
+                                    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = '0.5';
+                                  }}
+                                  onDragEnd={(e) => {
+                                    setDraggedTaskId(null);
+                                    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = '1';
+                                  }}
+                                  className={`group bg-white rounded-xl border border-gray-200 p-3 transition-all cursor-grab active:cursor-grabbing ${
+                                    isDragging ? 'opacity-50 scale-95' : 'hover:border-gray-300 hover:shadow-sm'
+                                  } ${task.column === 'done' ? 'opacity-70' : ''}`}
+                                >
+                                  {/* Title row */}
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                                      {/* Priority dot */}
+                                      <button
+                                        onClick={() => cycleTaskPriority(task.id)}
+                                        className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5 ${PRIORITY_DOTS[task.priority]} hover:ring-2 hover:ring-gray-300 transition-all`}
+                                        title={`Priority: ${task.priority} (click to cycle)`}
+                                      />
+                                      {isEditingThis ? (
+                                        <input
+                                          ref={taskEditRef}
+                                          type="text"
+                                          value={editingTaskValue}
+                                          onChange={(e) => setEditingTaskValue(e.target.value)}
+                                          onBlur={commitTaskEdit}
+                                          onKeyDown={(e) => {
+                                            if (e.key === 'Enter') commitTaskEdit();
+                                            if (e.key === 'Escape') setEditingTaskId(null);
+                                          }}
+                                          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-transparent"
+                                        />
+                                      ) : (
+                                        <p
+                                          onClick={() => {
+                                            setEditingTaskId(task.id);
+                                            setEditingTaskValue(task.title);
+                                          }}
+                                          className={`text-xs font-medium cursor-text leading-relaxed ${task.column === 'done' ? 'line-through text-gray-400' : 'text-gray-900'}`}
+                                        >
+                                          {task.title}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <button
+                                      onClick={() => deleteTask(task.id)}
+                                      className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity flex-shrink-0"
+                                      title="Delete"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                    </button>
+                                  </div>
+
+                                  {/* Badges */}
+                                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                                    <button
+                                      onClick={() => cycleTaskAssignee(task.id)}
+                                      className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold ${assigneeInfo.bg} ${assigneeInfo.text} hover:opacity-80 transition-opacity`}
+                                      title="Click to change assignee"
+                                    >
+                                      {assigneeInfo.label}
+                                    </button>
+                                    {task.day && (
+                                      <span className="inline-flex items-center rounded-md bg-gray-100 text-gray-500 px-1.5 py-0.5 text-[10px] font-medium">
+                                        Day {task.day}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ─── Days View ────────────────────────────────────────────── */}
+            {challengeView === 'days' && (<>
             {/* Scoreboard */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               {/* Johannes */}
@@ -1072,6 +1508,7 @@ export default function RoadmapPage() {
                 <li>Loser cooks the winner&apos;s most hated recipe on camera</li>
               </ul>
             </div>
+            </>)}
           </section>
         )}
       </main>
