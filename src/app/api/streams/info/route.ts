@@ -38,10 +38,19 @@ export async function POST(request: NextRequest) {
 
     const jpegBuffers = await generateInfoCarousel(data, style);
     const batchId = randomUUID();
-    const primaryLabel =
-      data.type === 'community_spotlight'
-        ? data.username
-        : data.title;
+    let primaryLabel = '';
+    switch (data.type) {
+      case 'community_spotlight':
+        primaryLabel = data.username;
+        break;
+      case 'cook_together':
+      case 'biteclub_stats':
+        primaryLabel = data.title;
+        break;
+      case 'this_or_that':
+        primaryLabel = data.theme || 'matchup';
+        break;
+    }
     const filenamePrefix = buildDescriptiveSlidePrefix(
       'info',
       data.type,

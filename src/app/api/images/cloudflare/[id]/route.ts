@@ -14,7 +14,7 @@ export async function GET(
 
   try {
     const slide = await loadCloudflareSlide(id);
-    return new NextResponse(slide.buffer, {
+    return new NextResponse(new Uint8Array(slide.buffer), {
       headers: {
         'Content-Type': slide.contentType,
         'Cache-Control': 'private, max-age=3600',

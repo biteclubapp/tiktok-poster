@@ -15,7 +15,7 @@ export async function GET(
 
   try {
     const buffer = await readSlideBuffer(`/api/images/${filename}`);
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'image/jpeg',
         'Cache-Control': 'public, max-age=3600',
