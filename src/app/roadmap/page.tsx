@@ -48,7 +48,7 @@ interface ChallengeEntry {
 
 // ─── 30-Day Challenge Plan ──────────────────────────────────────────────────
 
-const CHALLENGE_START = '2026-03-17'; // Tomorrow
+const CHALLENGE_START = '2026-03-16'; // Today
 
 const CHALLENGE_DAYS: ChallengeDay[] = [
   // Week 1: Origin & Hook
@@ -1501,7 +1501,7 @@ export default function RoadmapPage() {
             <div className="mt-8 p-5 bg-gray-50 rounded-2xl border border-gray-200">
               <h4 className="text-sm font-bold text-gray-900 mb-2">Challenge Rules</h4>
               <ul className="text-xs text-gray-500 space-y-1">
-                <li>Post one TikTok every day for 30 days (March 17 - April 15)</li>
+                <li>Post one TikTok every day for 30 days (March 16 - April 14)</li>
                 <li>Each day has a theme — follow the prompt or put your own spin on it</li>
                 <li>Track likes by clicking the number and updating it</li>
                 <li>Whoever has the most total likes at the end wins</li>
