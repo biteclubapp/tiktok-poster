@@ -250,30 +250,6 @@ export function styleFIngredients({ dish, platform }: SlideProps): React.ReactEl
         </div>
       </div>
 
-      {/* Branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 36,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 26,
-              fontWeight: 700,
-              color: WARM_GRAY,
-              letterSpacing: '0.14em',
-            }}
-          >
-            Fun fact: nobody in history has regretted buying fresh herbs. BiteClub will talk you into it every time.
-          </div>
-        </div>
-      )}
 
       {/* Bottom chunky bar */}
       <div

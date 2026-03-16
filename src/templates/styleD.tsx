@@ -110,20 +110,6 @@ export function styleDHero({ dish, heroImageBase64, platform }: SlideProps): Rea
           flexDirection: 'column',
         }}
       >
-        {/* Category label */}
-        <div
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: '#E63946',
-            letterSpacing: '0.08em',
-            lineHeight: 1.4,
-            marginBottom: 24,
-          }}
-        >
-          8 IN 10 PEOPLE SAY THEY'RE BORED OF THEIR OWN COOKING. THE OTHER 2 ARE ON BITECLUB.
-        </div>
-
         {/* Recipe name — massive editorial headline */}
         <div
           style={{

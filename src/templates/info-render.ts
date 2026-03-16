@@ -756,34 +756,6 @@ function buildHeroStatSlide(
         }
       }),
 
-      // BiteClub feature callout card
-      stat.nudge ? React.createElement('div', {
-        style: {
-          background: `${pal.accent}15`,
-          borderRadius: getCardRadius(style),
-          borderLeft: `5px solid ${pal.accent}`,
-          padding: '24px 32px',
-          marginTop: 36,
-          maxWidth: 780,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }
-      },
-        React.createElement('div', {
-          style: {
-            fontSize: 20, fontWeight: 800, color: pal.accent,
-            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-            display: 'flex',
-          }
-        }, 'ON BITECLUB'),
-        React.createElement('div', {
-          style: {
-            fontSize: 26, fontWeight: 500, color: pal.text,
-            textAlign: 'left', lineHeight: 1.45, display: 'flex',
-          }
-        }, stat.nudge)
-      ) : null
     ),
   ]);
 }
@@ -881,33 +853,6 @@ function buildStatPairSlide(
             }, stat.unit) : null
           ),
 
-          // BiteClub feature callout
-          stat.nudge ? React.createElement('div', {
-            style: {
-              background: `${pal.accent}12`,
-              borderRadius: Math.round(getCardRadius(style) * 0.6),
-              borderLeft: `4px solid ${pal.accent}`,
-              padding: '16px 20px',
-              marginTop: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-            }
-          },
-            React.createElement('div', {
-              style: {
-                fontSize: 18, fontWeight: 800, color: pal.accent,
-                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-                display: 'flex',
-              }
-            }, 'ON BITECLUB'),
-            React.createElement('div', {
-              style: {
-                fontSize: 22, fontWeight: 500, color: pal.text,
-                lineHeight: 1.4, display: 'flex',
-              }
-            }, stat.nudge)
-          ) : null
         )
       )
     ),
@@ -987,33 +932,6 @@ function buildStatTripleSlide(
           style: { fontSize: 44, fontWeight: 500, color: pal.muted }
         }, featured.unit) : null
       ),
-      // BiteClub feature callout
-      featured.nudge ? React.createElement('div', {
-        style: {
-          background: `${pal.accent}12`,
-          borderRadius: Math.round(getCardRadius(style) * 0.6),
-          borderLeft: `4px solid ${pal.accent}`,
-          padding: '16px 20px',
-          marginTop: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-        }
-      },
-        React.createElement('div', {
-          style: {
-            fontSize: 18, fontWeight: 800, color: pal.accent,
-            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-            display: 'flex',
-          }
-        }, 'ON BITECLUB'),
-        React.createElement('div', {
-          style: {
-            fontSize: 22, fontWeight: 500, color: pal.text,
-            lineHeight: 1.4, display: 'flex',
-          }
-        }, featured.nudge)
-      ) : null
     ),
 
     // Two supporting stats side by side
@@ -1061,33 +979,6 @@ function buildStatTripleSlide(
               style: { fontSize: 32, fontWeight: 500, color: pal.muted }
             }, stat.unit) : null
           ),
-          // BiteClub feature callout
-          stat.nudge ? React.createElement('div', {
-            style: {
-              background: `${pal.accent}12`,
-              borderRadius: Math.round(getCardRadius(style) * 0.5),
-              borderLeft: `3px solid ${pal.accent}`,
-              padding: '12px 14px',
-              marginTop: 6,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
-            }
-          },
-            React.createElement('div', {
-              style: {
-                fontSize: 14, fontWeight: 800, color: pal.accent,
-                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-                display: 'flex',
-              }
-            }, 'ON BITECLUB'),
-            React.createElement('div', {
-              style: {
-                fontSize: 18, fontWeight: 500, color: pal.text,
-                lineHeight: 1.35, display: 'flex',
-              }
-            }, stat.nudge)
-          ) : null
         )
       )
     ),
@@ -1807,34 +1698,6 @@ function buildRingGaugeSlide(
         },
       }),
 
-      // BiteClub nudge card
-      stat.nudge ? React.createElement('div', {
-        style: {
-          background: `${pal.accent}15`,
-          borderRadius: getCardRadius(style),
-          borderLeft: `5px solid ${pal.accent}`,
-          padding: '24px 32px',
-          marginTop: 32,
-          maxWidth: 780,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        },
-      },
-        React.createElement('div', {
-          style: {
-            fontSize: 20, fontWeight: 800, color: pal.accent,
-            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-            display: 'flex',
-          },
-        }, 'ON BITECLUB'),
-        React.createElement('div', {
-          style: {
-            fontSize: 26, fontWeight: 500, color: pal.text,
-            textAlign: 'left', lineHeight: 1.45, display: 'flex',
-          },
-        }, stat.nudge)
-      ) : null
     ),
   ]);
 }

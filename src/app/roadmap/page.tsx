@@ -25,6 +25,90 @@ interface InspirationProfile {
   categoryColor: string;
 }
 
+type Challenger = 'johannes' | 'will';
+type ChallengeStatus = 'upcoming' | 'posted' | 'skipped';
+type ContentFormat = 'Video' | 'Carousel' | 'Duet' | 'Stitch' | 'Story';
+
+interface ChallengeDay {
+  day: number;
+  theme: string;
+  prompt: string;
+  format: ContentFormat;
+  category: 'Origin Story' | 'Product' | 'Behind the Scenes' | 'Community' | 'Fun' | 'Growth';
+}
+
+interface ChallengeEntry {
+  day: number;
+  challenger: Challenger;
+  status: ChallengeStatus;
+  likes: number;
+  postUrl?: string;
+  note?: string;
+}
+
+// ─── 30-Day Challenge Plan ──────────────────────────────────────────────────
+
+const CHALLENGE_START = '2026-03-17'; // Tomorrow
+
+const CHALLENGE_DAYS: ChallengeDay[] = [
+  // Week 1: Origin & Hook
+  { day: 1,  theme: 'Why we built BiteClub',       prompt: 'Film yourself explaining why you started building a cooking app. Be raw and honest — what problem are you solving?', format: 'Video', category: 'Origin Story' },
+  { day: 2,  theme: 'What I cooked today',          prompt: 'Show what you actually cooked tonight using BiteClub. Real food, no staging.', format: 'Video', category: 'Product' },
+  { day: 3,  theme: 'My cooking streak',            prompt: 'Show your cooking streak in the app. Talk about why streaks make you actually cook more.', format: 'Carousel', category: 'Product' },
+  { day: 4,  theme: 'Coding at 2am',                prompt: 'Show your late-night coding setup. What feature are you building right now? B-roll of the code.', format: 'Video', category: 'Behind the Scenes' },
+  { day: 5,  theme: 'Rate my fridge',               prompt: 'Open your fridge on camera. Use BiteClub to find a recipe with what\'s in there.', format: 'Video', category: 'Fun' },
+  { day: 6,  theme: 'The feature nobody asked for', prompt: 'Show the weirdest or most niche feature you built. Why did you build it?', format: 'Video', category: 'Behind the Scenes' },
+  { day: 7,  theme: 'Week 1 recap — who\'s winning?', prompt: 'Side-by-side like count. React to each other\'s best post this week.', format: 'Duet', category: 'Fun' },
+
+  // Week 2: Product Deep-Dives
+  { day: 8,  theme: 'Cuisines I\'ve cooked map',    prompt: 'Show your cuisines map in BiteClub. Pick a country you haven\'t cooked from yet and try it tonight.', format: 'Video', category: 'Product' },
+  { day: 9,  theme: 'Our first user reaction',      prompt: 'Screen-record or re-enact the moment someone outside the team used BiteClub for the first time.', format: 'Video', category: 'Growth' },
+  { day: 10, theme: 'Flavor palate reveal',         prompt: 'Show your BiteClub flavor palate (sweet/salty/umami/spice). Are you balanced or one-note?', format: 'Carousel', category: 'Product' },
+  { day: 11, theme: 'Day in the life — founder cook', prompt: 'Full day: wake up, code, cook lunch with BiteClub, more code, cook dinner. Real day.', format: 'Video', category: 'Behind the Scenes' },
+  { day: 12, theme: '5 meals under $5',             prompt: 'Pick 5 budget recipes from BiteClub. Show the grocery haul and the finished plates.', format: 'Carousel', category: 'Product' },
+  { day: 13, theme: 'Bug that almost broke us',     prompt: 'Tell the story of the worst bug you\'ve encountered building BiteClub. Make it dramatic.', format: 'Video', category: 'Behind the Scenes' },
+  { day: 14, theme: 'Week 2 scoreboard',            prompt: 'Update the running scoreboard. Call out each other\'s best content. Trash talk encouraged.', format: 'Duet', category: 'Fun' },
+
+  // Week 3: Community & Growth
+  { day: 15, theme: 'Cook with a friend',           prompt: 'Invite someone over and cook a BiteClub recipe together. Get their honest review on camera.', format: 'Video', category: 'Community' },
+  { day: 16, theme: 'What type of cook are you?',   prompt: 'Show the "Type of Cook" badge feature. Take the quiz on camera and react to your result.', format: 'Video', category: 'Product' },
+  { day: 17, theme: 'Malmö vs wherever Will is',    prompt: 'Show your city\'s food scene. What local ingredients or dishes inspire you? Represent your city.', format: 'Video', category: 'Fun' },
+  { day: 18, theme: 'The recipe that changed my mind', prompt: 'Cook a recipe you thought you\'d hate. Film the whole journey from skepticism to the first bite.', format: 'Video', category: 'Product' },
+  { day: 19, theme: 'Building in public — real numbers', prompt: 'Show actual app metrics: downloads, active users, whatever you\'re comfortable sharing. Be transparent.', format: 'Carousel', category: 'Growth' },
+  { day: 20, theme: 'Recreate a childhood meal',    prompt: 'Ask your parents for a recipe from your childhood. Cook it and call them to show the result.', format: 'Video', category: 'Community' },
+  { day: 21, theme: 'Week 3 — the gap widens',      prompt: 'Full scoreboard update. React to comments. Address the haters (or lack thereof).', format: 'Duet', category: 'Fun' },
+
+  // Week 4: The Final Push
+  { day: 22, theme: 'I cooked every day for 22 days', prompt: 'Show your 22-day streak. How has daily cooking changed your routine? Be reflective.', format: 'Video', category: 'Product' },
+  { day: 23, theme: 'Feature request speedrun',      prompt: 'Pick a comment/DM requesting a feature. Build it live (or fake it). Ship by end of video.', format: 'Video', category: 'Behind the Scenes' },
+  { day: 24, theme: 'Meal prep Sunday',              prompt: 'Use BiteClub to plan and prep meals for the whole week. Time-lapse the entire cook.', format: 'Video', category: 'Product' },
+  { day: 25, theme: 'Cooking battle — same recipe',  prompt: 'Both of you cook the SAME recipe. Film it. Let comments decide who did it better.', format: 'Video', category: 'Fun' },
+  { day: 26, theme: 'What we\'d do differently',     prompt: 'If you started BiteClub over, what would you change? Honest founder reflections.', format: 'Video', category: 'Origin Story' },
+  { day: 27, theme: 'The community feed',            prompt: 'Show the BiteClub discovery feed. React to what other users are cooking. Hype them up.', format: 'Video', category: 'Community' },
+  { day: 28, theme: 'Teach me something in 60 sec',  prompt: 'One cooking skill, one minute. Knife skills, seasoning, plating — whatever you\'re best at.', format: 'Video', category: 'Fun' },
+  { day: 29, theme: 'Letter to future BiteClub',     prompt: 'Record a message to yourselves 1 year from now. Where do you hope BiteClub will be?', format: 'Video', category: 'Origin Story' },
+  { day: 30, theme: 'FINALE — Winner takes all',     prompt: 'Final like count reveal. Recap the best moments. Announce the winner. Loser cooks winner\'s most hated recipe.', format: 'Duet', category: 'Fun' },
+];
+
+const CATEGORY_COLORS: Record<ChallengeDay['category'], { bg: string; text: string; dot: string }> = {
+  'Origin Story':      { bg: 'bg-indigo-50',  text: 'text-indigo-600',  dot: 'bg-indigo-400' },
+  'Product':           { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-400' },
+  'Behind the Scenes': { bg: 'bg-amber-50',   text: 'text-amber-600',   dot: 'bg-amber-400' },
+  'Community':         { bg: 'bg-pink-50',    text: 'text-pink-600',    dot: 'bg-pink-400' },
+  'Fun':               { bg: 'bg-violet-50',  text: 'text-violet-600',  dot: 'bg-violet-400' },
+  'Growth':            { bg: 'bg-cyan-50',    text: 'text-cyan-600',    dot: 'bg-cyan-400' },
+};
+
+const FORMAT_ICONS: Record<ContentFormat, string> = {
+  'Video': '🎬',
+  'Carousel': '📸',
+  'Duet': '👥',
+  'Stitch': '✂️',
+  'Story': '📖',
+};
+
+const CHALLENGE_STORAGE_KEY = 'biteclub-challenge';
+
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const INSPIRATION_PROFILES: InspirationProfile[] = [
@@ -130,8 +214,15 @@ export default function RoadmapPage() {
   const [draggedCard, setDraggedCard] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [activeTab, setActiveTab] = useState<'inspiration' | 'board' | 'calendar'>('board');
+  const [activeTab, setActiveTab] = useState<'inspiration' | 'board' | 'calendar' | 'challenge'>('challenge');
   const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Challenge state
+  const [challengeEntries, setChallengeEntries] = useState<ChallengeEntry[]>([]);
+  const [editingLikes, setEditingLikes] = useState<{ day: number; challenger: Challenger } | null>(null);
+  const [likesInput, setLikesInput] = useState('');
+  const [challengeFilter, setChallengeFilter] = useState<'all' | ChallengeDay['category']>('all');
+  const [expandedDay, setExpandedDay] = useState<number | null>(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -145,6 +236,13 @@ export default function RoadmapPage() {
     } catch {
       setCards(DEFAULT_CARDS);
     }
+    // Load challenge entries
+    try {
+      const savedChallenge = localStorage.getItem(CHALLENGE_STORAGE_KEY);
+      if (savedChallenge) {
+        setChallengeEntries(JSON.parse(savedChallenge));
+      }
+    } catch { /* ignore */ }
     setLoaded(true);
   }, []);
 
@@ -154,6 +252,57 @@ export default function RoadmapPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
     }
   }, [cards, loaded]);
+
+  // Save challenge entries
+  useEffect(() => {
+    if (loaded) {
+      localStorage.setItem(CHALLENGE_STORAGE_KEY, JSON.stringify(challengeEntries));
+    }
+  }, [challengeEntries, loaded]);
+
+  // Challenge helpers
+  const getEntry = useCallback((day: number, challenger: Challenger): ChallengeEntry | undefined => {
+    return challengeEntries.find(e => e.day === day && e.challenger === challenger);
+  }, [challengeEntries]);
+
+  const updateEntry = useCallback((day: number, challenger: Challenger, updates: Partial<ChallengeEntry>) => {
+    setChallengeEntries(prev => {
+      const existing = prev.find(e => e.day === day && e.challenger === challenger);
+      if (existing) {
+        return prev.map(e => e.day === day && e.challenger === challenger ? { ...e, ...updates } : e);
+      }
+      return [...prev, { day, challenger, status: 'upcoming' as ChallengeStatus, likes: 0, ...updates }];
+    });
+  }, []);
+
+  const toggleStatus = useCallback((day: number, challenger: Challenger) => {
+    const entry = challengeEntries.find(e => e.day === day && e.challenger === challenger);
+    const current = entry?.status || 'upcoming';
+    const next: ChallengeStatus = current === 'upcoming' ? 'posted' : current === 'posted' ? 'skipped' : 'upcoming';
+    updateEntry(day, challenger, { status: next });
+  }, [challengeEntries, updateEntry]);
+
+  const totalLikes = useCallback((challenger: Challenger): number => {
+    return challengeEntries.filter(e => e.challenger === challenger).reduce((sum, e) => sum + e.likes, 0);
+  }, [challengeEntries]);
+
+  const postsCount = useCallback((challenger: Challenger): number => {
+    return challengeEntries.filter(e => e.challenger === challenger && e.status === 'posted').length;
+  }, [challengeEntries]);
+
+  const getDayDate = useCallback((day: number): string => {
+    const start = new Date(CHALLENGE_START + 'T00:00:00');
+    start.setDate(start.getDate() + day - 1);
+    return start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }, []);
+
+  const getCurrentDay = useCallback((): number => {
+    const start = new Date(CHALLENGE_START + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diff = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return Math.max(1, Math.min(30, diff));
+  }, []);
 
   // Focus edit input
   useEffect(() => {
@@ -345,6 +494,7 @@ export default function RoadmapPage() {
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-gray-200 p-1 w-fit">
           {([
+            { key: 'challenge' as const, label: '30-Day Challenge' },
             { key: 'board' as const, label: 'Content Board' },
             { key: 'calendar' as const, label: 'Calendar' },
             { key: 'inspiration' as const, label: 'Inspiration' },
@@ -567,6 +717,360 @@ export default function RoadmapPage() {
                   ))
                 )}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* ─── 30-Day Challenge Tab ───────────────────────────────────────── */}
+        {activeTab === 'challenge' && (
+          <section>
+            {/* Scoreboard */}
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {/* Johannes */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full -translate-y-8 translate-x-8" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">J</div>
+                    <div>
+                      <h3 className="text-lg font-bold">Johannes</h3>
+                      <p className="text-blue-200 text-xs">Co-founder</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-3xl font-black">{totalLikes('johannes').toLocaleString()}</p>
+                      <p className="text-blue-200 text-xs mt-0.5">Total Likes</p>
+                    </div>
+                    <div>
+                      <p className="text-3xl font-black">{postsCount('johannes')}<span className="text-lg text-blue-300">/30</span></p>
+                      <p className="text-blue-200 text-xs mt-0.5">Posts Made</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Will */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 text-white">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-400/20 rounded-full -translate-y-8 translate-x-8" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">W</div>
+                    <div>
+                      <h3 className="text-lg font-bold">Will</h3>
+                      <p className="text-orange-200 text-xs">Co-founder</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-3xl font-black">{totalLikes('will').toLocaleString()}</p>
+                      <p className="text-orange-200 text-xs mt-0.5">Total Likes</p>
+                    </div>
+                    <div>
+                      <p className="text-3xl font-black">{postsCount('will')}<span className="text-lg text-orange-300">/30</span></p>
+                      <p className="text-orange-200 text-xs mt-0.5">Posts Made</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Winner banner (if likes differ) */}
+            {totalLikes('johannes') !== totalLikes('will') && (totalLikes('johannes') > 0 || totalLikes('will') > 0) && (
+              <div className={`mb-6 rounded-xl p-4 text-center font-bold text-sm ${
+                totalLikes('johannes') > totalLikes('will')
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'bg-orange-50 text-orange-700 border border-orange-200'
+              }`}>
+                {totalLikes('johannes') > totalLikes('will')
+                  ? `Johannes is leading by ${(totalLikes('johannes') - totalLikes('will')).toLocaleString()} likes`
+                  : `Will is leading by ${(totalLikes('will') - totalLikes('johannes')).toLocaleString()} likes`
+                }
+              </div>
+            )}
+
+            {/* Category filter */}
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              <button
+                onClick={() => setChallengeFilter('all')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  challengeFilter === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                All Days
+              </button>
+              {(['Origin Story', 'Product', 'Behind the Scenes', 'Community', 'Fun', 'Growth'] as const).map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setChallengeFilter(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    challengeFilter === cat
+                      ? `${CATEGORY_COLORS[cat].bg} ${CATEGORY_COLORS[cat].text}`
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Challenge Days Grid */}
+            <div className="space-y-3">
+              {CHALLENGE_DAYS
+                .filter(d => challengeFilter === 'all' || d.category === challengeFilter)
+                .map(day => {
+                  const jEntry = getEntry(day.day, 'johannes');
+                  const wEntry = getEntry(day.day, 'will');
+                  const isExpanded = expandedDay === day.day;
+                  const isCurrentDay = getCurrentDay() === day.day;
+                  const isPast = getCurrentDay() > day.day;
+                  const colors = CATEGORY_COLORS[day.category];
+                  const weekNum = Math.ceil(day.day / 7);
+
+                  // Show week header
+                  const showWeekHeader = day.day === 1 || day.day === 8 || day.day === 15 || day.day === 22;
+                  const weekLabel = day.day === 1 ? 'Week 1 — Origin & Hook' : day.day === 8 ? 'Week 2 — Product Deep-Dives' : day.day === 15 ? 'Week 3 — Community & Growth' : 'Week 4 — The Final Push';
+
+                  return (
+                    <div key={day.day}>
+                      {showWeekHeader && challengeFilter === 'all' && (
+                        <div className="flex items-center gap-3 mt-8 mb-4 first:mt-0">
+                          <div className="h-px flex-1 bg-gray-200" />
+                          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap">{weekLabel}</h3>
+                          <div className="h-px flex-1 bg-gray-200" />
+                        </div>
+                      )}
+
+                      <div
+                        className={`rounded-2xl border transition-all ${
+                          isCurrentDay
+                            ? 'border-red-300 bg-red-50/30 ring-2 ring-red-100'
+                            : isPast
+                              ? 'border-gray-200 bg-gray-50/50'
+                              : 'border-gray-200 bg-white'
+                        }`}
+                      >
+                        {/* Day Header — always visible */}
+                        <button
+                          onClick={() => setExpandedDay(isExpanded ? null : day.day)}
+                          className="w-full px-5 py-4 flex items-center gap-4 text-left"
+                        >
+                          {/* Day number */}
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${
+                            isCurrentDay ? 'bg-red-500 text-white' : isPast ? 'bg-gray-200 text-gray-500' : `${colors.bg} ${colors.text}`
+                          }`}>
+                            {day.day}
+                          </div>
+
+                          {/* Theme */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className={`font-bold truncate ${isPast && !isCurrentDay ? 'text-gray-500' : 'text-gray-900'}`}>
+                                {day.theme}
+                              </h4>
+                              {isCurrentDay && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white animate-pulse">
+                                  TODAY
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-400 mt-0.5">{getDayDate(day.day)}</p>
+                          </div>
+
+                          {/* Format + Category badges */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-sm">{FORMAT_ICONS[day.format]}</span>
+                            <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-bold ${colors.bg} ${colors.text}`}>
+                              {day.category}
+                            </span>
+                          </div>
+
+                          {/* Quick score display */}
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className="text-right">
+                              <p className={`text-xs font-bold ${jEntry?.status === 'posted' ? 'text-blue-600' : 'text-gray-300'}`}>
+                                {jEntry?.likes ? jEntry.likes.toLocaleString() : '—'}
+                              </p>
+                              <p className="text-[10px] text-gray-400">J</p>
+                            </div>
+                            <div className="text-gray-200 text-xs font-bold">vs</div>
+                            <div className="text-left">
+                              <p className={`text-xs font-bold ${wEntry?.status === 'posted' ? 'text-orange-600' : 'text-gray-300'}`}>
+                                {wEntry?.likes ? wEntry.likes.toLocaleString() : '—'}
+                              </p>
+                              <p className="text-[10px] text-gray-400">W</p>
+                            </div>
+                          </div>
+
+                          {/* Expand chevron */}
+                          <svg className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {/* Expanded content */}
+                        {isExpanded && (
+                          <div className="px-5 pb-5 border-t border-gray-100">
+                            {/* Prompt */}
+                            <div className="mt-4 mb-5 p-4 bg-gray-50 rounded-xl">
+                              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Content Prompt</p>
+                              <p className="text-sm text-gray-700 leading-relaxed">{day.prompt}</p>
+                            </div>
+
+                            {/* Two columns: Johannes vs Will */}
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Johannes */}
+                              <div className={`rounded-xl border-2 p-4 transition-colors ${
+                                jEntry?.status === 'posted' ? 'border-blue-200 bg-blue-50/50' :
+                                jEntry?.status === 'skipped' ? 'border-gray-200 bg-gray-50 opacity-60' :
+                                'border-gray-200 bg-white'
+                              }`}>
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">J</div>
+                                    <span className="text-sm font-bold text-gray-900">Johannes</span>
+                                  </div>
+                                  <button
+                                    onClick={() => toggleStatus(day.day, 'johannes')}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                      jEntry?.status === 'posted' ? 'bg-green-100 text-green-700' :
+                                      jEntry?.status === 'skipped' ? 'bg-gray-200 text-gray-500' :
+                                      'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {jEntry?.status === 'posted' ? 'Posted' : jEntry?.status === 'skipped' ? 'Skipped' : 'Not Posted'}
+                                  </button>
+                                </div>
+
+                                {/* Likes input */}
+                                <div className="mb-3">
+                                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Likes</label>
+                                  {editingLikes?.day === day.day && editingLikes?.challenger === 'johannes' ? (
+                                    <input
+                                      type="number"
+                                      value={likesInput}
+                                      onChange={e => setLikesInput(e.target.value)}
+                                      onBlur={() => {
+                                        updateEntry(day.day, 'johannes', { likes: parseInt(likesInput) || 0 });
+                                        setEditingLikes(null);
+                                      }}
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                          updateEntry(day.day, 'johannes', { likes: parseInt(likesInput) || 0 });
+                                          setEditingLikes(null);
+                                        }
+                                      }}
+                                      autoFocus
+                                      className="w-full mt-1 px-3 py-2 text-lg font-bold bg-white border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    />
+                                  ) : (
+                                    <p
+                                      onClick={() => {
+                                        setEditingLikes({ day: day.day, challenger: 'johannes' });
+                                        setLikesInput(String(jEntry?.likes || 0));
+                                      }}
+                                      className="mt-1 text-2xl font-black text-blue-600 cursor-pointer hover:text-blue-700"
+                                    >
+                                      {(jEntry?.likes || 0).toLocaleString()}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Post URL */}
+                                <input
+                                  type="text"
+                                  placeholder="Paste TikTok link..."
+                                  value={jEntry?.postUrl || ''}
+                                  onChange={e => updateEntry(day.day, 'johannes', { postUrl: e.target.value })}
+                                  className="w-full px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-300"
+                                />
+                              </div>
+
+                              {/* Will */}
+                              <div className={`rounded-xl border-2 p-4 transition-colors ${
+                                wEntry?.status === 'posted' ? 'border-orange-200 bg-orange-50/50' :
+                                wEntry?.status === 'skipped' ? 'border-gray-200 bg-gray-50 opacity-60' :
+                                'border-gray-200 bg-white'
+                              }`}>
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">W</div>
+                                    <span className="text-sm font-bold text-gray-900">Will</span>
+                                  </div>
+                                  <button
+                                    onClick={() => toggleStatus(day.day, 'will')}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                      wEntry?.status === 'posted' ? 'bg-green-100 text-green-700' :
+                                      wEntry?.status === 'skipped' ? 'bg-gray-200 text-gray-500' :
+                                      'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {wEntry?.status === 'posted' ? 'Posted' : wEntry?.status === 'skipped' ? 'Skipped' : 'Not Posted'}
+                                  </button>
+                                </div>
+
+                                {/* Likes input */}
+                                <div className="mb-3">
+                                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Likes</label>
+                                  {editingLikes?.day === day.day && editingLikes?.challenger === 'will' ? (
+                                    <input
+                                      type="number"
+                                      value={likesInput}
+                                      onChange={e => setLikesInput(e.target.value)}
+                                      onBlur={() => {
+                                        updateEntry(day.day, 'will', { likes: parseInt(likesInput) || 0 });
+                                        setEditingLikes(null);
+                                      }}
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                          updateEntry(day.day, 'will', { likes: parseInt(likesInput) || 0 });
+                                          setEditingLikes(null);
+                                        }
+                                      }}
+                                      autoFocus
+                                      className="w-full mt-1 px-3 py-2 text-lg font-bold bg-white border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+                                    />
+                                  ) : (
+                                    <p
+                                      onClick={() => {
+                                        setEditingLikes({ day: day.day, challenger: 'will' });
+                                        setLikesInput(String(wEntry?.likes || 0));
+                                      }}
+                                      className="mt-1 text-2xl font-black text-orange-600 cursor-pointer hover:text-orange-700"
+                                    >
+                                      {(wEntry?.likes || 0).toLocaleString()}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Post URL */}
+                                <input
+                                  type="text"
+                                  placeholder="Paste TikTok link..."
+                                  value={wEntry?.postUrl || ''}
+                                  onChange={e => updateEntry(day.day, 'will', { postUrl: e.target.value })}
+                                  className="w-full px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-200 placeholder-gray-300"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Challenge info footer */}
+            <div className="mt-8 p-5 bg-gray-50 rounded-2xl border border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-2">Challenge Rules</h4>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li>Post one TikTok every day for 30 days (March 17 - April 15)</li>
+                <li>Each day has a theme — follow the prompt or put your own spin on it</li>
+                <li>Track likes by clicking the number and updating it</li>
+                <li>Whoever has the most total likes at the end wins</li>
+                <li>Loser cooks the winner&apos;s most hated recipe on camera</li>
+              </ul>
             </div>
           </section>
         )}

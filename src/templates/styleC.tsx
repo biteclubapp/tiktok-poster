@@ -90,11 +90,6 @@ export function styleCHero({ dish, heroImageBase64, platform }: SlideProps): Rea
                 {`${dish.ingredientCount} ingredients · ${dish.stepCount} steps`}
               </div>
             </div>
-            {platform !== 'reddit' && (
-              <div style={{ color: '#c4b4a0', fontSize: 27, fontWeight: 500, marginTop: 14 }}>
-                Cooking at home 5x a week saves around $3,000 a year. BiteClub makes it a lot easier to want to.
-              </div>
-            )}
           </div>
 
         </div>
