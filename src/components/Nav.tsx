@@ -8,7 +8,7 @@ import { logout } from '@/app/login/actions';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
-  { href: '/streams', label: 'Streams' },
+  { href: '/streams', label: 'Content' },
   { href: '/studio', label: 'Studio' },
   { href: '/schedule', label: 'Schedule' },
   { href: '/trending', label: 'Trending' },

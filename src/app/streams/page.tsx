@@ -3,347 +3,158 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-interface ContentStream {
+// ─── Content types ──────────────────────────────────────────────────────────
+
+interface ContentType {
   id: string;
   emoji: string;
   title: string;
-  vibe: string;
-  description: string;
-  href: string | null;
+  desc: string;
+  href: string;
+  presetCount: number;
   color: string;
-  bgGradient: string;
-  status: 'live' | 'new' | 'soon';
-  platforms: ('tiktok' | 'reddit' | 'instagram')[];
-  examples: string[];
+  accent: string;
+  platforms: string[];
 }
 
-const STREAMS: ContentStream[] = [
-  {
-    id: 'recipe',
-    emoji: '🍳',
-    title: 'Recipe Carousels',
-    vibe: 'The OG',
-    description: 'Turn any BiteClub dish into a swipeable recipe breakdown. Pick a template, hit publish.',
-    href: '/',
-    color: 'text-red-600',
-    bgGradient: 'from-red-50 to-orange-50',
-    status: 'live',
-    platforms: ['tiktok', 'reddit', 'instagram'],
-    examples: ['Chicken Couscous breakdown', 'Thai Curry step-by-step', 'Pasta carbonara how-to'],
-  },
-  {
-    id: 'info',
-    emoji: '💡',
-    title: 'Food Knowledge',
-    vibe: 'Big brain energy',
-    description: 'Cooking tips, food facts, nutrition breakdowns, ingredient hacks — no recipe needed.',
-    href: '/streams/info',
-    color: 'text-blue-600',
-    bgGradient: 'from-blue-50 to-cyan-50',
-    status: 'new',
-    platforms: ['tiktok', 'instagram'],
-    examples: ['5 ways to use tahini', 'Why you salt pasta water', 'Protein in everyday foods'],
-  },
-  {
-    id: 'ugc',
-    emoji: '📱',
-    title: 'UGC Wrappers',
-    vibe: 'Casual & authentic',
-    description: 'Wrap your carousels in phone frames, story overlays, or photo dump layouts. Feels real.',
-    href: '/streams/ugc',
-    color: 'text-purple-600',
-    bgGradient: 'from-purple-50 to-pink-50',
-    status: 'new',
-    platforms: ['tiktok', 'instagram'],
-    examples: ['iPhone screenshot frame', 'Story-style with stickers', 'Messy photo dump grid'],
-  },
-  {
-    id: 'day-in-life',
-    emoji: '🎬',
-    title: 'Day in the Life',
-    vibe: 'Behind the scenes',
-    description: 'What it looks like building a food app. Dev life, cooking tests, real moments. People follow people.',
-    href: '/streams/day-in-life',
-    color: 'text-amber-600',
-    bgGradient: 'from-amber-50 to-yellow-50',
-    status: 'new',
-    platforms: ['tiktok', 'instagram'],
-    examples: ['Morning routine + cooking', 'Office taste testing', 'Late night debugging + ramen'],
-  },
-  {
-    id: 'challenges',
-    emoji: '🔥',
-    title: 'Food Challenges',
-    vibe: 'Engagement bait (the good kind)',
-    description: 'Rate my fridge, guess the dish, cook with 3 ingredients — interactive content that gets comments.',
-    href: '/streams/challenges',
-    color: 'text-orange-600',
-    bgGradient: 'from-orange-50 to-red-50',
-    status: 'new',
-    platforms: ['tiktok'],
-    examples: ['Rate my fridge', 'Guess the dish from ingredients', '$10 vs $100 meal'],
-  },
-  {
-    id: 'spotlights',
-    emoji: '✨',
-    title: 'User Spotlights',
-    vibe: 'Community flex',
-    description: 'Feature what BiteClub users are actually cooking. Social proof + community love = follows.',
-    href: '/streams/spotlights',
-    color: 'text-pink-600',
-    bgGradient: 'from-pink-50 to-rose-50',
-    status: 'new',
-    platforms: ['tiktok', 'reddit', 'instagram'],
-    examples: ['This week\'s top cook', 'User meal of the day', 'Before/after cooking glow-up'],
-  },
-  {
-    id: 'meal-prep',
-    emoji: '🥡',
-    title: 'Meal Prep Guides',
-    vibe: 'Sunday energy',
-    description: 'Weekly meal plans, batch cooking breakdowns, budget-friendly prep sessions.',
-    href: '/streams/meal-prep',
-    color: 'text-green-600',
-    bgGradient: 'from-green-50 to-emerald-50',
-    status: 'new',
-    platforms: ['tiktok', 'reddit', 'instagram'],
-    examples: ['$50 weekly meal prep', '5 lunches in 1 hour', 'Freezer meal starter pack'],
-  },
-  {
-    id: 'polls',
-    emoji: '🗳️',
-    title: 'Polls & Quizzes',
-    vibe: 'Hot takes only',
-    description: 'Food opinions that start wars in the comments. Pineapple on pizza? Ketchup on eggs? Let them fight.',
-    href: '/streams/polls',
-    color: 'text-indigo-600',
-    bgGradient: 'from-indigo-50 to-violet-50',
-    status: 'new',
-    platforms: ['tiktok', 'instagram'],
-    examples: ['Is this a sandwich?', 'Rank these comfort foods', 'Unpopular food opinion'],
-  },
-  {
-    id: 'seasonal',
-    emoji: '🍂',
-    title: 'Seasonal & Trending',
-    vibe: 'Right place, right time',
-    description: 'Seasonal ingredients, holiday recipes, trending food moments. Ride the wave when it hits.',
-    href: '/streams/seasonal',
-    color: 'text-teal-600',
-    bgGradient: 'from-teal-50 to-cyan-50',
-    status: 'new',
-    platforms: ['tiktok', 'reddit', 'instagram'],
-    examples: ['Spring produce guide', 'Halloween snack ideas', 'What\'s trending this week'],
-  },
-  {
-    id: 'versus',
-    emoji: '⚔️',
-    title: 'Food Battles',
-    vibe: 'Pick a side',
-    description: 'Head-to-head comparisons that get people talking. Two dishes, two takes, one winner (voted by comments).',
-    href: '/streams/versus',
-    color: 'text-rose-600',
-    bgGradient: 'from-rose-50 to-red-50',
-    status: 'new',
-    platforms: ['tiktok', 'instagram'],
-    examples: ['Tacos vs Burritos', 'Homemade vs Store-bought', 'Gordon vs Grandma'],
-  },
-  {
-    id: 'stories',
-    emoji: '📖',
-    title: 'Food Stories',
-    vibe: 'The feels',
-    description: 'The story behind the dish. Cultural history, family recipes, why this meal matters. Emotional hooks that stick.',
-    href: '/streams/stories',
-    color: 'text-stone-600',
-    bgGradient: 'from-stone-50 to-neutral-100',
-    status: 'new',
-    platforms: ['tiktok', 'reddit', 'instagram'],
-    examples: ['My grandma\'s secret recipe', 'The history of ramen', 'Why I started cooking'],
-  },
+const CONTENT_TYPES: ContentType[] = [
+  { id: 'info', emoji: '💡', title: 'Food Knowledge', desc: 'Stats, tips, nutrition, debates — generates real carousel slides you can publish instantly.', href: '/streams/info', presetCount: 68, color: 'from-blue-500 to-cyan-500', accent: 'text-blue-600', platforms: ['TT', 'IG', 'Rd'] },
+  { id: 'day-in-life', emoji: '🎬', title: 'Day in the Life', desc: 'Behind-the-scenes founder content. Coding, cooking, real moments.', href: '/streams/day-in-life', presetCount: 37, color: 'from-amber-400 to-yellow-500', accent: 'text-amber-600', platforms: ['TT', 'IG'] },
+  { id: 'challenges', emoji: '🔥', title: 'Food Challenges', desc: 'Fridge raids, budget battles, speed runs, taste tests.', href: '/streams/challenges', presetCount: 36, color: 'from-orange-500 to-red-500', accent: 'text-orange-600', platforms: ['TT'] },
+  { id: 'spotlights', emoji: '✨', title: 'User Spotlights', desc: 'Feature real BiteClub users, streak heroes, community recipes.', href: '/streams/spotlights', presetCount: 32, color: 'from-pink-500 to-rose-500', accent: 'text-pink-600', platforms: ['TT', 'IG', 'Rd'] },
+  { id: 'meal-prep', emoji: '🥡', title: 'Meal Prep', desc: 'Budget preps, time savers, diet-specific, family-sized batches.', href: '/streams/meal-prep', presetCount: 35, color: 'from-green-500 to-emerald-500', accent: 'text-green-600', platforms: ['TT', 'IG', 'Rd'] },
+  { id: 'polls', emoji: '🗳️', title: 'Polls & Quizzes', desc: 'Hot takes, this-or-that, would-you-rather, rate-it.', href: '/streams/polls', presetCount: 37, color: 'from-indigo-500 to-violet-500', accent: 'text-indigo-600', platforms: ['TT', 'IG'] },
+  { id: 'seasonal', emoji: '🍂', title: 'Seasonal & Trending', desc: 'Spring, summer, fall, winter themes + viral food trends.', href: '/streams/seasonal', presetCount: 39, color: 'from-teal-500 to-cyan-500', accent: 'text-teal-600', platforms: ['TT', 'IG', 'Rd'] },
+  { id: 'versus', emoji: '⚔️', title: 'Food Battles', desc: 'Head-to-head comparisons, technique wars, budget vs bougie.', href: '/streams/versus', presetCount: 38, color: 'from-rose-500 to-red-500', accent: 'text-rose-600', platforms: ['TT', 'IG'] },
+  { id: 'stories', emoji: '📖', title: 'Food Stories', desc: 'Family recipes, cultural origins, personal journeys, nostalgia.', href: '/streams/stories', presetCount: 35, color: 'from-stone-500 to-neutral-600', accent: 'text-stone-600', platforms: ['TT', 'IG', 'Rd'] },
 ];
 
-const STATUS_BADGE = {
-  live: { label: 'Live', class: 'bg-green-500 text-white' },
-  new: { label: 'New', class: 'bg-blue-500 text-white' },
-  soon: { label: 'Coming Soon', class: 'bg-gray-200 text-gray-600' },
-};
+const TOTAL_PRESETS = CONTENT_TYPES.reduce((sum, t) => sum + t.presetCount, 0);
 
-const PLATFORM_ICON: Record<string, string> = {
-  tiktok: 'TT',
-  reddit: 'Rd',
-  instagram: 'IG',
-};
+export default function ContentPage() {
+  const [search, setSearch] = useState('');
 
-export default function StreamsPage() {
-  const [filter, setFilter] = useState<string>('All');
-
-  const liveStreams = STREAMS.filter(s => s.status === 'live' || s.status === 'new');
-  const comingSoon = STREAMS.filter(s => s.status === 'soon');
-
-  const filtered = filter === 'All' ? STREAMS
-    : filter === 'Live' ? STREAMS.filter(s => s.status === 'live')
-    : filter === 'New' ? STREAMS.filter(s => s.status === 'new')
-    : comingSoon;
+  const filtered = search.trim()
+    ? CONTENT_TYPES.filter(t =>
+        t.title.toLowerCase().includes(search.toLowerCase()) ||
+        t.desc.toLowerCase().includes(search.toLowerCase())
+      )
+    : CONTENT_TYPES;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Content Streams</h1>
+        <div className="mb-10">
+          <h1 className="text-2xl font-bold text-gray-900">Content</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Every type of content BiteClub can make. Pick a stream and start creating.
+            {TOTAL_PRESETS} ready-to-use content ideas with TikTok captions across {CONTENT_TYPES.length} categories.
           </p>
         </div>
 
-        {/* Quick-launch: Active streams */}
-        <div className="mb-10">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Ready to Use</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {liveStreams.map(stream => {
-              const badge = STATUS_BADGE[stream.status];
-              return (
-                <Link
-                  key={stream.id}
-                  href={stream.href || '/'}
-                  className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-md transition-all"
-                >
-                  {/* Gradient accent top */}
-                  <div className={`h-1.5 bg-gradient-to-r ${stream.bgGradient}`} />
-
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">{stream.emoji}</span>
-                        <div>
-                          <h3 className="text-sm font-bold text-gray-900 group-hover:text-gray-700">{stream.title}</h3>
-                          <p className={`text-[11px] font-semibold ${stream.color} uppercase tracking-wide`}>{stream.vibe}</p>
-                        </div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${badge.class}`}>
-                        {badge.label}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-gray-500 leading-relaxed mb-3">{stream.description}</p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        {stream.platforms.map(p => (
-                          <span key={p} className="px-1.5 py-0.5 rounded bg-gray-100 text-[9px] font-bold text-gray-400 uppercase">
-                            {PLATFORM_ICON[p]}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-xs font-semibold text-gray-400 group-hover:text-red-500 transition-colors flex items-center gap-1">
-                        Open
-                        <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M3 8h10M9 4l4 4-4 4" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* All streams grid */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">All Streams</h2>
-            <div className="flex items-center gap-1.5">
-              {(['All', 'Live', 'New', 'Coming Soon'] as const).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                    filter === f
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {f}
-                </button>
-              ))}
+        {/* Hero: Carousel Generator */}
+        <Link
+          href="/streams/info"
+          className="group block mb-10 relative overflow-hidden rounded-2xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-lg transition-all"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-orange-500/5" />
+          <div className="relative p-8 flex items-center gap-8">
+            <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-3xl shadow-lg">
+              🍳
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-lg font-bold text-gray-900">Carousel Generator</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500 text-white uppercase tracking-wide">Live</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-2">
+                Pick a topic, choose a template, generate real carousel slides. Publish to TikTok, Instagram, or Reddit in one click.
+              </p>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-400">68 presets</span>
+                <span className="text-xs text-gray-300">|</span>
+                <span className="text-xs text-gray-400">6 templates</span>
+                <span className="text-xs text-gray-300">|</span>
+                <span className="text-xs text-gray-400">1080×1440 output</span>
+              </div>
+            </div>
+            <div className="flex-shrink-0 text-gray-300 group-hover:text-red-500 transition-colors">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           </div>
+        </Link>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {filtered.map(stream => {
-              const badge = STATUS_BADGE[stream.status];
-              const isClickable = stream.href !== null;
-
-              const card = (
-                <div className={`group bg-white rounded-xl border border-gray-200 p-4 transition-all h-full flex flex-col ${
-                  isClickable ? 'hover:border-gray-300 hover:shadow-sm cursor-pointer' : 'opacity-70'
-                }`}>
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <span className="text-2xl">{stream.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-gray-900 truncate">{stream.title}</h3>
-                      <p className={`text-[10px] font-semibold ${stream.color} uppercase tracking-wide`}>{stream.vibe}</p>
-                    </div>
-                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide flex-shrink-0 ${badge.class}`}>
-                      {badge.label}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-gray-500 leading-relaxed mb-3 flex-1">{stream.description}</p>
-
-                  {/* Examples */}
-                  <div className="space-y-1 mb-3">
-                    {stream.examples.map((ex, i) => (
-                      <div key={i} className="flex items-center gap-1.5 text-[11px] text-gray-400">
-                        <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
-                        {ex}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between pt-2.5 border-t border-gray-100">
-                    <div className="flex items-center gap-1">
-                      {stream.platforms.map(p => (
-                        <span key={p} className="px-1.5 py-0.5 rounded bg-gray-100 text-[9px] font-bold text-gray-400 uppercase">
-                          {PLATFORM_ICON[p]}
-                        </span>
-                      ))}
-                    </div>
-                    {isClickable ? (
-                      <span className="text-[11px] font-semibold text-gray-400 group-hover:text-red-500 transition-colors flex items-center gap-1">
-                        Open
-                        <svg viewBox="0 0 16 16" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M3 8h10M9 4l4 4-4 4" />
-                        </svg>
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-gray-300 font-medium">Soon</span>
-                    )}
-                  </div>
-                </div>
-              );
-
-              return isClickable ? (
-                <Link key={stream.id} href={stream.href!}>{card}</Link>
-              ) : (
-                <div key={stream.id}>{card}</div>
-              );
-            })}
-          </div>
+        {/* Search */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search content types..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full max-w-sm px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 placeholder-gray-400"
+          />
         </div>
 
-        {/* Stats footer */}
-        <div className="mt-8 flex items-center justify-center gap-6 text-xs text-gray-400">
-          <span><strong className="text-gray-600">{STREAMS.filter(s => s.status === 'live').length}</strong> live</span>
+        {/* Content Ideas Grid */}
+        <div className="mb-4">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Content Ideas</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Each has pre-written TikTok captions with BiteClub tie-ins. Pick a type to browse.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtered.map(type => (
+            <Link
+              key={type.id}
+              href={type.href}
+              className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all"
+            >
+              {/* Color bar */}
+              <div className={`h-1 bg-gradient-to-r ${type.color}`} />
+
+              <div className="p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">{type.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-gray-700 truncate">{type.title}</h3>
+                    <p className={`text-[10px] font-bold ${type.accent} uppercase tracking-wide`}>{type.presetCount} ideas</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">{type.desc}</p>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    {type.platforms.map(p => (
+                      <span key={p} className="px-1.5 py-0.5 rounded bg-gray-100 text-[9px] font-bold text-gray-400">{p}</span>
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-semibold text-gray-300 group-hover:text-red-500 transition-colors flex items-center gap-0.5">
+                    Browse
+                    <svg viewBox="0 0 16 16" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-sm text-gray-400">No content types match &ldquo;{search}&rdquo;</p>
+          </div>
+        )}
+
+        {/* Footer stats */}
+        <div className="mt-10 flex items-center justify-center gap-6 text-xs text-gray-400">
+          <span><strong className="text-gray-600">{TOTAL_PRESETS}</strong> total presets</span>
           <span className="w-1 h-1 rounded-full bg-gray-300" />
-          <span><strong className="text-gray-600">{STREAMS.filter(s => s.status === 'new').length}</strong> new</span>
+          <span><strong className="text-gray-600">{CONTENT_TYPES.length}</strong> content types</span>
           <span className="w-1 h-1 rounded-full bg-gray-300" />
-          <span><strong className="text-gray-600">{STREAMS.filter(s => s.status === 'soon').length}</strong> coming soon</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300" />
-          <span>All 1080×1440</span>
+          <span>All with TikTok captions</span>
         </div>
       </main>
     </div>
