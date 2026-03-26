@@ -191,29 +191,6 @@ export function styleCIngredients({ dish, platform }: SlideProps): React.ReactEl
       </div>
 
       {/* BITECLUB branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 48,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              color: '#d4c4b0',
-              fontSize: 30,
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-            }}
-          >
-            A grocery list built from real recipes wastes almost nothing. That's BiteClub doing its thing.
-          </div>
-        </div>
-      )}
 
       {/* Bottom accent */}
       <div
@@ -325,29 +302,6 @@ export function styleCSteps({ dish, platform }: SlideProps): React.ReactElement 
       </div>
 
       {/* BITECLUB branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 48,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              color: '#d4c4b0',
-              fontSize: 30,
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-            }}
-          >
-            The best part about following steps with a friend? You can blame them if it goes wrong. Try BiteClub.
-          </div>
-        </div>
-      )}
 
       {/* Bottom accent */}
       <div

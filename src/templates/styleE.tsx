@@ -32,22 +32,6 @@ export function styleEHero({ dish, heroImageBase64, platform }: SlideProps): Rea
         }}
       />
 
-      {/* Branding — top left, very small */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 42,
-            left: 72,
-            fontSize: 24,
-            fontWeight: 400,
-            color: '#999',
-            letterSpacing: '0.18em',
-          }}
-        >
-          Cooking the same rotation is normal. Knowing there's better out there and doing nothing is a choice. BiteClub.
-        </div>
-      )}
 
       {/* Cook time — top right */}
       <div
@@ -252,30 +236,6 @@ export function styleEIngredients({ dish, platform }: SlideProps): React.ReactEl
       </div>
 
       {/* Branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 54,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 400,
-              color: '#c0c0bc',
-              letterSpacing: '0.18em',
-            }}
-          >
-            The ingredient list is where most people give up. The ones who don't eat much better. BiteClub helps.
-          </div>
-        </div>
-      )}
-
       {/* Bottom thin rule */}
       <div style={{ height: 2, background: '#1a1a1a', flexShrink: 0 }} />
     </div>
@@ -399,29 +359,6 @@ export function styleESteps({ dish, platform }: SlideProps): React.ReactElement 
       </div>
 
       {/* Branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 54,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 400,
-              color: '#c0c0bc',
-              letterSpacing: '0.18em',
-            }}
-          >
-            Step-by-step is the difference between dinner and a disaster. BiteClub keeps you on track.
-          </div>
-        </div>
-      )}
 
       {/* Bottom thin rule */}
       <div style={{ height: 2, background: '#1a1a1a', flexShrink: 0 }} />

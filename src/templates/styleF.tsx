@@ -67,26 +67,6 @@ export function styleFHero({ dish, heroImageBase64, platform }: SlideProps): Rea
           {dish.cookTime}
         </div>
 
-        {/* Branding badge — top right inside photo */}
-        {platform !== 'reddit' && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 30,
-              right: 30,
-              background: CORAL,
-              color: '#fff',
-              fontSize: 26,
-              fontWeight: 800,
-              padding: '12px 28px',
-              borderRadius: 999,
-              border: `3px solid ${DARK}`,
-              letterSpacing: '0.06em',
-            }}
-          >
-            Your fridge deserves better than Tuesday pasta again. BiteClub has opinions.
-          </div>
-        )}
       </div>
 
       {/* Info area */}
@@ -382,29 +362,6 @@ export function styleFSteps({ dish, platform }: SlideProps): React.ReactElement 
       </div>
 
       {/* Branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 36,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 26,
-              fontWeight: 700,
-              color: WARM_GRAY,
-              letterSpacing: '0.14em',
-            }}
-          >
-            Cooking is basically a group activity you do alone. Unless you're on BiteClub — hi, friends.
-          </div>
-        </div>
-      )}
 
       {/* Bottom chunky bar */}
       <div

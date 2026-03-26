@@ -406,22 +406,6 @@ export function styleDSteps({ dish, platform }: SlideProps): React.ReactElement 
         </div>
       </div>
 
-      {/* Branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 48,
-            right: 60,
-            fontSize: 26,
-            fontWeight: 700,
-            color: '#333',
-            letterSpacing: '0.12em',
-          }}
-        >
-          A recipe you actually finish is worth 12 you saved and forgot. BiteClub is where you finish them.
-        </div>
-      )}
 
       {/* Bottom red bar */}
       <div

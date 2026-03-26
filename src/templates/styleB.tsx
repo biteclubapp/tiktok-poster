@@ -56,33 +56,6 @@ export function styleBHero({ dish, heroImageBase64, platform }: SlideProps): Rea
         }}
       />
 
-      {/* BITECLUB badge - top right */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 48,
-            right: 48,
-            background: 'rgba(0,0,0,0.6)',
-            borderRadius: 18,
-            padding: '15px 30px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 18,
-          }}
-        >
-          <span
-            style={{
-              color: '#E63946',
-              fontSize: 30,
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-            }}
-          >
-            The world's best home cooks don't have better ingredients. They have better taste. BiteClub trains yours.
-          </span>
-        </div>
-      )}
 
       {/* Title overlay - bottom */}
       <div
@@ -330,22 +303,6 @@ export function styleBSteps({ dish, platform }: SlideProps): React.ReactElement 
         ))}
       </div>
 
-      {/* BITECLUB branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 60,
-            right: 72,
-            color: '#333',
-            fontSize: 30,
-            fontWeight: 600,
-            letterSpacing: '0.1em',
-          }}
-        >
-          Cooking is 90% prep and 10% looking confident. BiteClub handles the prep.
-        </div>
-      )}
     </div>
   );
 }

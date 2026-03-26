@@ -103,11 +103,6 @@ export function styleAHero({ dish, heroImageBase64, platform }: SlideProps): Rea
             {`${dish.ingredientCount} ingredients`}
           </div>
         </div>
-        {platform !== 'reddit' && (
-          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 28, fontWeight: 500, marginTop: 16, letterSpacing: '0.03em' }}>
-            Most home cooks make the same 7 dishes on repeat. BiteClub is how you finally add an 8th.
-          </div>
-        )}
       </div>
     </div>
   );
@@ -190,42 +185,6 @@ export function styleAIngredients({ dish, platform }: SlideProps): React.ReactEl
           ))}
         </div>
       </div>
-
-      {/* BiteClub branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 60,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 18,
-          }}
-        >
-          <div
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
-              background: '#E63946',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: 700,
-            }}
-          >
-            BC
-          </div>
-          <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
-            Knowing what's in a dish makes you 3x more likely to actually cook it. That's the whole idea behind BiteClub.
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -321,41 +280,6 @@ export function styleASteps({ dish, platform }: SlideProps): React.ReactElement 
         </div>
       </div>
 
-      {/* BiteClub branding */}
-      {platform !== 'reddit' && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 60,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 18,
-          }}
-        >
-          <div
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
-              background: '#E63946',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: 700,
-            }}
-          >
-            BC
-          </div>
-          <div style={{ color: '#bbb', fontSize: 33, fontWeight: 600, letterSpacing: '0.05em' }}>
-            Following a recipe step-by-step cuts kitchen mistakes by half. BiteClub keeps the steps where you need them.
-          </div>
-        </div>
-      )}
     </div>
   );
 }
