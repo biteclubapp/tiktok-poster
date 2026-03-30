@@ -85,7 +85,7 @@ async function renderJsxToJpeg(
   const pngData = resvg.render();
   const pngBuffer = pngData.asPng();
 
-  // sharp: upscale to full 1080x1440 + convert to JPEG
+  // sharp: upscale to full 1080x1920 + convert to JPEG
   const jpegBuffer = await sharp(pngBuffer)
     .resize(WIDTH, HEIGHT, { kernel: 'lanczos3' })
     .jpeg({ quality: 88 })

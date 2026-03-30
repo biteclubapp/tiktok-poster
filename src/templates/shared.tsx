@@ -2,8 +2,8 @@ import { DishData } from '@/types';
 import React from 'react';
 
 // Dynamic sizing for steps — fills the full page height
-// Available content area: ~1440 - 72*2 (padding) - 120 (header+label) - 100 (branding) ≈ 1076px
-const STEP_CONTENT_HEIGHT = 1076;
+// Available content area: ~1920 - 72*2 (padding) - 120 (header+label) - 100 (branding) ≈ 1556px
+const STEP_CONTENT_HEIGHT = 1556;
 
 export function getStepSizing(count: number) {
   // Calculate how much space each step gets
@@ -31,7 +31,7 @@ export function getStepSizing(count: number) {
 }
 
 // Available content area for ingredients (single-column list)
-const ING_CONTENT_HEIGHT = 1076;
+const ING_CONTENT_HEIGHT = 1556;
 
 export function getIngredientSizing(count: number) {
   const spacePerItem = ING_CONTENT_HEIGHT / Math.max(count, 1);
@@ -104,9 +104,9 @@ export function getIngredientEmoji(ingredient: string): string {
   return '🍽';
 }
 
-// TikTok carousel dimensions (3:4 aspect ratio)
+// TikTok carousel dimensions (9:16 full portrait)
 export const WIDTH = 1080;
-export const HEIGHT = 1440;
+export const HEIGHT = 1920;
 
 export type Platform = 'tiktok' | 'reddit' | 'instagram';
 
