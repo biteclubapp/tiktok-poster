@@ -328,6 +328,201 @@ function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+// ─── Anti-Food Culture 20-Day Script ─────────────────────────────────────────
+
+interface AntiCultureDay {
+  day: number;
+  title: string;
+  hook: string;
+  script: string;
+  format: 'Carousel' | 'Video' | 'Duet';
+  angle: 'Anti-Aesthetic' | 'Real Food' | 'Anti-Doom Scroll' | 'Hot Take' | 'Raw Honesty' | 'Counter Culture';
+  cta: string;
+}
+
+const ANTI_CULTURE_DAYS: AntiCultureDay[] = [
+  {
+    day: 1,
+    title: 'Your Food Doesn\'t Need to Be Pretty',
+    hook: 'Your food doesn\'t need to be pretty. It needs to be real. That\'s why we built BiteClub.',
+    script: 'Open on a messy plate of food that looks amazing but not photogenic. Show the Instagram-worthy version vs the real version side by side. Talk about how food apps reward aesthetics over cooking. End with: the best meal you ever ate probably looked terrible.',
+    format: 'Carousel',
+    angle: 'Anti-Aesthetic',
+    cta: 'BiteClub doesn\'t have filters. Just food. Link in bio.',
+  },
+  {
+    day: 2,
+    title: 'You\'ve Saved 847 Recipes and Cooked 3',
+    hook: 'You\'ve saved 847 recipes on Instagram and cooked exactly 3 of them. We did the math.',
+    script: 'Start with a screen recording of someone\'s saved recipes folder — thousands of posts. Cut to their actual cooking history: basically nothing. The gap between saving and cooking is where food culture broke. BiteClub tracks what you actually make, not what you bookmark.',
+    format: 'Video',
+    angle: 'Anti-Doom Scroll',
+    cta: 'BiteClub counts meals cooked, not meals saved. Download free.',
+  },
+  {
+    day: 3,
+    title: 'The Overhead Shot Is a Lie',
+    hook: 'Every food photo you see is shot from above because the side view looks like a crime scene.',
+    script: 'Carousel: Slide 1 — gorgeous overhead shot. Slide 2 — the exact same food from the side. Slide 3 — what the kitchen actually looked like. Slide 4 — the 47 takes it took. Slide 5 — this is why BiteClub doesn\'t care about your photos.',
+    format: 'Carousel',
+    angle: 'Anti-Aesthetic',
+    cta: 'On BiteClub your cooking history is what matters, not your camera angle.',
+  },
+  {
+    day: 4,
+    title: 'Stop Watching People Cook and Actually Cook',
+    hook: 'You\'ve spent 3 hours watching cooking content today and eaten cereal for dinner.',
+    script: 'Show the screen time stats — hours of food TikTok. Then show the actual meals made this week: zero. The scroll trap is real. Watching cooking content makes you feel like you cooked. You didn\'t. Close the app. Open your fridge.',
+    format: 'Video',
+    angle: 'Anti-Doom Scroll',
+    cta: 'BiteClub is the anti-doom-scroll cooking app. Try it free.',
+  },
+  {
+    day: 5,
+    title: 'Brown Food Is Delicious',
+    hook: 'The most delicious food on earth is brown, beige, or slightly burnt. Nobody posts it.',
+    script: 'Show a lineup of incredible but ugly food: stews, curries, braises, roasted vegetables, caramelized onions. All brown. All incredible. Then show the food that gets millions of likes: rainbow smoothie bowls nobody actually eats. The correlation between how food looks and how it tastes is basically zero.',
+    format: 'Carousel',
+    angle: 'Real Food',
+    cta: 'BiteClub celebrates every meal — even the ugly ones. Link in bio.',
+  },
+  {
+    day: 6,
+    title: 'Meal Prep Content Is Toxic',
+    hook: 'Nobody is meal prepping 27 containers on Sunday and smiling about it. Stop lying.',
+    script: 'The Sunday meal prep aesthetic is a lie. Most people barely manage to cook dinner on a weeknight. Showing 27 identical containers of chicken and rice as "self care" is creating unrealistic expectations. Real meal prep is making extra pasta and putting it in a container. That\'s it.',
+    format: 'Video',
+    angle: 'Hot Take',
+    cta: 'BiteClub tracks your actual cooking — 3-ingredient Tuesday dinner counts.',
+  },
+  {
+    day: 7,
+    title: 'The Last Thing the World Needs Is Another App to Doom Scroll',
+    hook: 'The last thing the world needs is another app to doom scroll. So we built the opposite.',
+    script: 'This is the manifesto post. Every food app is designed to keep you scrolling. BiteClub is designed to get you cooking. No infinite feed. No algorithm. No content creators. Just your real cooking history, your real friends, and recipes you\'ll actually make. We built BiteClub because food apps are broken.',
+    format: 'Video',
+    angle: 'Counter Culture',
+    cta: 'BiteClub. No scroll. Just cook. Link in bio.',
+  },
+  {
+    day: 8,
+    title: 'Your Phone Eats First and That\'s the Problem',
+    hook: 'Your phone eats first at every meal. Your food gets cold while you find the right angle.',
+    script: 'Film someone taking 14 photos of their food before eating. Time how long the food sits getting cold. Then show someone just... eating. The meal is warm. They\'re present. No one on Instagram cares about your dinner. The people at the table do.',
+    format: 'Video',
+    angle: 'Anti-Aesthetic',
+    cta: 'BiteClub logs meals after you eat them, not before. Download free.',
+  },
+  {
+    day: 9,
+    title: 'This Is What Dinner Actually Looks Like',
+    hook: 'This is what dinner looks like when nobody is watching. And it tastes incredible.',
+    script: 'Carousel of real, unstaged, unfiltered weeknight dinners. Mismatched plates. A pan on the table because who needs a serving dish. Bread straight from the bag. This is how real people eat. This is what BiteClub is for.',
+    format: 'Carousel',
+    angle: 'Real Food',
+    cta: 'Your real dinners deserve a real cooking app. Try BiteClub.',
+  },
+  {
+    day: 10,
+    title: 'Food Influencers Don\'t Cook Like That',
+    hook: 'Food influencers have a production team, a food stylist, and 4 hours. You have 20 minutes and a toddler.',
+    script: 'Behind the scenes of food content: the lighting rig, the 12 angles, the food that goes in the bin after the shot. Then your kitchen: one overhead light, a phone propped against a jar, and you\'re actually going to eat this. The gap between content and reality is the gap BiteClub closes.',
+    format: 'Video',
+    angle: 'Hot Take',
+    cta: 'BiteClub is built for people who actually cook. Not people who film it.',
+  },
+  {
+    day: 11,
+    title: 'The 3-Ingredient Dinner Is Not Lazy',
+    hook: 'Cooking with 3 ingredients isn\'t lazy. Ordering delivery because you saw a 47-ingredient recipe and gave up is lazy.',
+    script: 'Show a perfect 3-ingredient meal: pasta, garlic, olive oil. Aglio e olio. One of the best dishes in Italian cooking. Then show the "easy weeknight dinner" recipe with 23 ingredients, 14 steps, and a shopping list that requires 3 stores. Who\'s actually cooking?',
+    format: 'Carousel',
+    angle: 'Real Food',
+    cta: 'Every meal counts on BiteClub. Even the 3-ingredient ones.',
+  },
+  {
+    day: 12,
+    title: 'Nobody Needs 47 Spices',
+    hook: 'Your spice rack doesn\'t need to look like a Moroccan market. Salt, pepper, and garlic powder do 90% of the work.',
+    script: 'The spice rack industrial complex. Show the Instagram spice wall vs what most good home cooks actually use: 5-6 spices max. The pantry content on social media exists to sell you things. Real cooking is simpler than the internet wants you to believe.',
+    format: 'Video',
+    angle: 'Hot Take',
+    cta: 'BiteClub tracks what you cook, not what you own. Link in bio.',
+  },
+  {
+    day: 13,
+    title: 'Cooking Alone on a Tuesday Is Enough',
+    hook: 'You don\'t need a dinner party to justify cooking. Tuesday night, alone, pan of eggs. That\'s cooking.',
+    script: 'The internet has convinced people that cooking only counts if it\'s an event. Dinner party. Date night. Sunday spread. But the most important meals are the quiet ones. The ones you make for yourself on a random Tuesday when nobody is watching. That\'s the habit. That\'s what matters.',
+    format: 'Video',
+    angle: 'Raw Honesty',
+    cta: 'Your Tuesday night eggs show up on your BiteClub cooking streak. As they should.',
+  },
+  {
+    day: 14,
+    title: 'The Recipe You\'ll Actually Make',
+    hook: 'The recipe with 2 million saves has a cook rate of basically 0%. Here\'s one you\'ll actually make.',
+    script: 'Carousel: Show viral recipe stats — millions of saves, almost nobody cooks them. Then show a dead-simple recipe: 5 ingredients, 15 minutes, genuinely delicious. The gap between aspirational food content and actual cooking is enormous. BiteClub closes that gap.',
+    format: 'Carousel',
+    angle: 'Anti-Doom Scroll',
+    cta: 'BiteClub shows you recipes people actually cook. Not just save. Try it free.',
+  },
+  {
+    day: 15,
+    title: 'Your Kitchen Is Fine',
+    hook: 'Your kitchen is fine. Stop comparing it to a renovated brownstone with a $3,000 range.',
+    script: 'Every cooking video happens in a perfect kitchen. Marble countertops. Copper pans. The reality: most people cook in a small kitchen with one good pan and a cutting board balanced on the counter. And they cook incredible food. The kitchen doesn\'t make the cook.',
+    format: 'Video',
+    angle: 'Raw Honesty',
+    cta: 'BiteClub doesn\'t care what your kitchen looks like. Just that you use it.',
+  },
+  {
+    day: 16,
+    title: 'Leftovers Are a Lifestyle',
+    hook: 'Reheating last night\'s dinner is not failure. It\'s efficiency. It\'s sustainability. It\'s lunch.',
+    script: 'The anti-leftover bias in food content is wild. Everything has to be fresh, made from scratch, plated beautifully. Meanwhile: last night\'s curry tastes better today. That\'s science. Leftovers are the most underrated meal category and we\'re done pretending otherwise.',
+    format: 'Carousel',
+    angle: 'Real Food',
+    cta: 'Leftover meals count on your BiteClub streak. Because they should.',
+  },
+  {
+    day: 17,
+    title: 'We Built BiteClub Because Food Apps Are Broken',
+    hook: 'Every food app wants you to scroll. We built one that wants you to cook.',
+    script: 'Product story post. Walk through what\'s wrong with food apps: infinite scroll, algorithm-driven discovery, content-first design. Then show BiteClub: your cooking history, your real friends, your actual meals. No content creators. No trending page. Just cooking.',
+    format: 'Video',
+    angle: 'Counter Culture',
+    cta: 'BiteClub. The anti-food-app food app. Link in bio.',
+  },
+  {
+    day: 18,
+    title: 'Most People Eat the Same 5 Meals and That\'s Fine',
+    hook: 'You eat the same 5 meals on rotation and that\'s completely fine. The internet made you feel bad about it.',
+    script: 'The pressure to constantly try new recipes comes from content, not from real life. Professional chefs have a rotation. Home cooks have a rotation. Having 5 meals you can make with your eyes closed is a superpower, not a limitation. Own your rotation.',
+    format: 'Carousel',
+    angle: 'Raw Honesty',
+    cta: 'BiteClub shows your rotation proudly in your Cooking History. Link in bio.',
+  },
+  {
+    day: 19,
+    title: 'No Filters. No Followers. Just Food.',
+    hook: 'No filters. No followers. No algorithm. Just you and the food you actually make.',
+    script: 'Positioning post. Side by side: what social media food culture looks like (filters, followers, likes, performance) vs what BiteClub looks like (cooking streaks, real meals, actual friends). One is designed to make you feel inadequate. The other is designed to make you cook.',
+    format: 'Carousel',
+    angle: 'Counter Culture',
+    cta: 'BiteClub. Where nobody cares what your kitchen looks like. Download free.',
+  },
+  {
+    day: 20,
+    title: 'The Anti-Food Culture Manifesto',
+    hook: 'Food doesn\'t need to be content. Cooking doesn\'t need an audience. Your kitchen doesn\'t need an aesthetic.',
+    script: 'The capstone post. Rapid-fire text slides or a to-camera manifesto. Food doesn\'t need to be pretty. Cooking doesn\'t need to be performance. Leftovers are meals. 3 ingredients is enough. Your kitchen is fine. Saving a recipe is not cooking. Scrolling is not learning. The best food you\'ll ever eat looks terrible. Cook more. Scroll less. That\'s it. That\'s the whole thing.',
+    format: 'Video',
+    angle: 'Counter Culture',
+    cta: 'BiteClub. Cook more. Scroll less. Link in bio.',
+  },
+];
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function RoadmapPage() {
@@ -337,7 +532,7 @@ export default function RoadmapPage() {
   const [draggedCard, setDraggedCard] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [activeTab, setActiveTab] = useState<'inspiration' | 'board' | 'calendar' | 'challenge'>('challenge');
+  const [activeTab, setActiveTab] = useState<'inspiration' | 'board' | 'calendar' | 'challenge' | 'anti-culture'>('challenge');
   const editInputRef = useRef<HTMLInputElement>(null);
 
   // Challenge state
@@ -704,6 +899,7 @@ export default function RoadmapPage() {
         <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-gray-200 p-1 w-fit">
           {([
             { key: 'challenge' as const, label: '30-Day Challenge' },
+            { key: 'anti-culture' as const, label: 'Anti-Food Culture' },
             { key: 'board' as const, label: 'Content Board' },
             { key: 'calendar' as const, label: 'Calendar' },
             { key: 'inspiration' as const, label: 'Inspiration' },
@@ -1509,6 +1705,77 @@ export default function RoadmapPage() {
               </ul>
             </div>
             </>)}
+          </section>
+        )}
+        {/* ─── Anti-Food Culture 20-Day Script ─────────────────────────── */}
+        {activeTab === 'anti-culture' && (
+          <section>
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900">Anti-Food Culture — 20-Day Posting Script</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Counter-cultural TikTok content calling out performative cooking. Post one per day. Each has a script outline, hook, and the angle.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {ANTI_CULTURE_DAYS.map((day) => (
+                <div key={day.day} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div className="p-5">
+                    <div className="flex items-start gap-4">
+                      {/* Day number */}
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
+                        <span className="text-red-600 font-bold text-sm">D{day.day}</span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        {/* Title + format */}
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-bold text-gray-900">{day.title}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                            day.format === 'Carousel' ? 'bg-blue-50 text-blue-600' :
+                            day.format === 'Video' ? 'bg-amber-50 text-amber-600' :
+                            'bg-purple-50 text-purple-600'
+                          }`}>
+                            {day.format}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                            day.angle === 'Anti-Aesthetic' ? 'bg-rose-50 text-rose-600' :
+                            day.angle === 'Real Food' ? 'bg-amber-50 text-amber-600' :
+                            day.angle === 'Anti-Doom Scroll' ? 'bg-slate-50 text-slate-600' :
+                            day.angle === 'Hot Take' ? 'bg-orange-50 text-orange-600' :
+                            day.angle === 'Raw Honesty' ? 'bg-stone-50 text-stone-600' :
+                            'bg-purple-50 text-purple-600'
+                          }`}>
+                            {day.angle}
+                          </span>
+                        </div>
+
+                        {/* Hook */}
+                        <p className="text-xs font-semibold text-red-500 mb-1.5">&ldquo;{day.hook}&rdquo;</p>
+
+                        {/* Script outline */}
+                        <p className="text-xs text-gray-500 leading-relaxed">{day.script}</p>
+
+                        {/* CTA */}
+                        <p className="text-[11px] text-gray-400 mt-2 italic">{day.cta}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary footer */}
+            <div className="mt-8 p-5 bg-gray-50 rounded-2xl border border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-2">Posting Rules</h4>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li>One post per day for 20 days — carousel or video as marked</li>
+                <li>Every hook is designed to stop the scroll with a provocative statement</li>
+                <li>Every post ties back to BiteClub as the antidote to performative food culture</li>
+                <li>Best times to post: 7-9am, 12-1pm, or 7-9pm for the target demographic</li>
+                <li>Use carousel format from the Anti-Food Culture stream page to generate slides</li>
+              </ul>
+            </div>
           </section>
         )}
       </main>
