@@ -148,6 +148,31 @@ export default function PostControls({
     }
   }
 
+  const [captionCopied, setCaptionCopied] = useState(false);
+
+  async function handleCopyCaption() {
+    try {
+      await navigator.clipboard.writeText(caption);
+      setCaptionCopied(true);
+      setTimeout(() => setCaptionCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = caption;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCaptionCopied(true);
+      setTimeout(() => setCaptionCopied(false), 2000);
+    }
+  }
+
+  async function handleDownloadAndCopy() {
+    await handleCopyCaption();
+    await downloadAll();
+  }
+
   return (
     <div className="space-y-6">
       {/* TikTok Section */}
@@ -174,43 +199,53 @@ export default function PostControls({
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 resize-none"
             placeholder="Write a caption..."
           />
-          <p className="text-xs text-gray-400 mt-1">{caption.length}/2200 characters</p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs text-gray-400">{caption.length}/2200 characters</p>
+            <button
+              onClick={handleCopyCaption}
+              className="text-xs text-gray-400 hover:text-gray-600 font-medium transition-colors"
+            >
+              {captionCopied ? 'Copied!' : 'Copy caption'}
+            </button>
+          </div>
         </div>
 
         {/* TikTok Actions */}
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2">
+          {/* Primary action: download slides + copy caption in one click */}
           <button
-            onClick={downloadAll}
+            onClick={handleDownloadAndCopy}
             disabled={slides.length === 0}
-            className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="w-full px-4 py-3.5 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
-            Download All JPEGs ({slides.length})
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download Slides + Copy Caption ({slides.length})
           </button>
 
-          <button
-            onClick={() => onSchedule(caption)}
-            disabled={slides.length === 0}
-            className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl text-sm font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            Schedule
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onSchedule(caption)}
+              disabled={slides.length === 0}
+              className="flex-1 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-xs font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Schedule
+            </button>
+            <button
+              onClick={downloadAll}
+              disabled={slides.length === 0}
+              className="flex-1 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl text-xs font-semibold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Download Only
+            </button>
+          </div>
 
-          <button
-            onClick={() => onPublish(caption)}
-            disabled={!tiktokConnected || slides.length === 0 || publishing}
-            className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            {publishing ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                Publishing...
-              </span>
-            ) : tiktokConnected ? (
-              'Post to TikTok'
-            ) : (
-              'Connect TikTok First'
-            )}
-          </button>
+          <p className="text-[11px] text-gray-400 text-center">
+            Downloads slides to your device and copies caption to clipboard. Open TikTok and paste.
+          </p>
         </div>
       </div>
 
